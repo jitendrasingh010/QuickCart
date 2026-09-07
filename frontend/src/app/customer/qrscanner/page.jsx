@@ -33,6 +33,10 @@ import {
 
 export default function ScanPage() {
   const scannerRef = useRef(null);
+  const hasScannedRef = useRef(false);
+  const isProcessingRef = useRef(false);
+  const isProcessingPaymentRef = useRef(false);
+  const hasVerifiedPaymentRef = useRef(false);
 
   // Scanner & Scanning State
   const [isScanning, setIsScanning] = useState(false);
@@ -88,10 +92,14 @@ export default function ScanPage() {
     }
   }, [scanError]);
 
-  // Shared function: Fetch product by decoded QR and update cart (auto-increment on duplicate scan)
+  // Shared function: Fetch product by decoded QR and update cart (processed only once per scan)
   const addProductToCart = useCallback(async (decodedText) => {
     const productId = String(decodedText).trim();
-    if (!productId) return;
+    if (!productId) {
+      hasScannedRef.current = false;
+      isProcessingRef.current = false;
+      return;
+    }
 
     try {
       setIsProcessing(true);
@@ -104,6 +112,7 @@ export default function ScanPage() {
 
       if (!productData) {
         setScanError("QR not recognized. Try another QR.");
+        hasScannedRef.current = false;
         return;
       }
 
@@ -136,16 +145,20 @@ export default function ScanPage() {
     } catch (error) {
       console.error("Error fetching product:", error);
       setScanError(error.response?.data?.message || "QR not recognized. Try another QR.");
+      hasScannedRef.current = false;
     } finally {
       setIsProcessing(false);
+      isProcessingRef.current = false;
       setProcessingMsg("");
     }
   }, []);
 
-  // Live Camera Scanner
+  // Live Camera Scanner - Single Scan per Session Enforcement
   const startScanner = async () => {
     if (isScanning) return;
     setScanError(null);
+    hasScannedRef.current = false;
+    isProcessingRef.current = false;
 
     try {
       setIsScanning(true);
@@ -162,6 +175,24 @@ export default function ScanPage() {
           qrbox: { width: 240, height: 240 },
         },
         async (decodedText) => {
+          // Atomic check: Ignore any subsequent scan callbacks once a QR is detected
+          if (hasScannedRef.current || isProcessingRef.current) return;
+          hasScannedRef.current = true;
+          isProcessingRef.current = true;
+
+          // Immediately stop and clear the camera stream & scanner instance
+          if (scannerRef.current) {
+            try {
+              await scannerRef.current.stop();
+              await scannerRef.current.clear();
+            } catch (err) {
+              console.error("Error stopping scanner on scan:", err);
+            }
+            scannerRef.current = null;
+          }
+          setIsScanning(false);
+
+          // Process the QR code exactly once
           await addProductToCart(decodedText);
         }
       );
@@ -175,6 +206,8 @@ export default function ScanPage() {
         } catch (_) {}
         scannerRef.current = null;
       }
+      hasScannedRef.current = false;
+      isProcessingRef.current = false;
       setIsScanning(false);
     }
   };
@@ -189,15 +222,25 @@ export default function ScanPage() {
       }
       scannerRef.current = null;
     }
+    hasScannedRef.current = false;
+    isProcessingRef.current = false;
     setIsScanning(false);
   };
 
-  // Cleanup scanner on unmount
+  // Cleanup scanner and flags on unmount
   useEffect(() => {
     return () => {
       if (scannerRef.current) {
-        scannerRef.current.stop().catch(() => {});
+        try {
+          scannerRef.current.stop().catch(() => {});
+          scannerRef.current.clear().catch(() => {});
+        } catch (_) {}
+        scannerRef.current = null;
       }
+      hasScannedRef.current = false;
+      isProcessingRef.current = false;
+      isProcessingPaymentRef.current = false;
+      hasVerifiedPaymentRef.current = false;
     };
   }, []);
 
@@ -219,12 +262,15 @@ export default function ScanPage() {
     return cart.reduce((sum, item) => sum + item.quantity, 0);
   }, [cart]);
 
-  // Razorpay Checkout
+  // Razorpay Checkout - Single Execution Guard
   const handlePayment = async () => {
     if (cart.length === 0) {
       setScanError("Please scan at least one product before checking out.");
       return;
     }
+
+    if (isCheckingOut || isProcessingPaymentRef.current) return;
+    isProcessingPaymentRef.current = true;
 
     try {
       setIsCheckingOut(true);
@@ -251,6 +297,10 @@ export default function ScanPage() {
         description: "In-Store QR Self-Checkout",
         order_id: data.order.id,
         async handler(response) {
+          // Prevent duplicate payment verification API calls
+          if (hasVerifiedPaymentRef.current) return;
+          hasVerifiedPaymentRef.current = true;
+
           try {
             await api.post("/paymentapi/verify", {
               cartItems: cart,
@@ -275,11 +325,26 @@ export default function ScanPage() {
               setPaymentStep(0);
               setCart([]);
               setLastScannedProduct(null);
+              hasScannedRef.current = false;
+              isProcessingPaymentRef.current = false;
+              hasVerifiedPaymentRef.current = false;
             }, 5000);
           } catch (error) {
             console.error("Payment verification error:", error);
             setScanError(error.response?.data?.message || "Payment verification failed.");
+            hasVerifiedPaymentRef.current = false;
+            isProcessingPaymentRef.current = false;
+            hasScannedRef.current = false;
+          } finally {
+            setIsCheckingOut(false);
           }
+        },
+        modal: {
+          ondismiss: () => {
+            setIsCheckingOut(false);
+            isProcessingPaymentRef.current = false;
+            hasVerifiedPaymentRef.current = false;
+          },
         },
         theme: {
           color: "#2563eb",
@@ -287,12 +352,22 @@ export default function ScanPage() {
       };
 
       const razorpay = new window.Razorpay(options);
+      razorpay.on("payment.failed", (response) => {
+        console.error("Payment failed:", response.error);
+        setScanError(response.error?.description || "Payment failed. Please try again.");
+        setIsCheckingOut(false);
+        isProcessingPaymentRef.current = false;
+        hasVerifiedPaymentRef.current = false;
+        hasScannedRef.current = false;
+      });
       razorpay.open();
     } catch (error) {
       console.error("Unable to create payment order:", error);
       setScanError("Unable to initiate payment order. Please try again.");
-    } finally {
       setIsCheckingOut(false);
+      isProcessingPaymentRef.current = false;
+      hasVerifiedPaymentRef.current = false;
+      hasScannedRef.current = false;
     }
   };
 
