@@ -14,6 +14,21 @@ exports.signup = async (req, res) => {
     }
 };
 
+const isProduction = process.env.NODE_ENV === "production";
+
+const cookieOptions = {
+    httpOnly: true,
+    secure: isProduction,
+    sameSite: isProduction ? "none" : "lax",
+    maxAge: 7 * 24 * 60 * 60 * 1000,
+};
+
+const clearCookieOptions = {
+    httpOnly: true,
+    secure: isProduction,
+    sameSite: isProduction ? "none" : "lax",
+};
+
 exports.login = async (req, res) => {
     try {
         const { email, password } = req.body;
@@ -21,12 +36,7 @@ exports.login = async (req, res) => {
             return res.status(400).json({ message: 'Email and password are required' });
         }
         const { user, token } = await userService.loginUser(email, password);
-        res.cookie("token", token, {
-            httpOnly: true,
-            secure: false,
-            sameSite: "lax",
-            maxAge: 7 * 24 * 60 * 60 * 1000
-        });
+        res.cookie("token", token, cookieOptions);
         res.status(200).json({ message: 'Login successful', user, token });
     } catch (error) {
         console.error('Error during login:', error);
@@ -41,12 +51,7 @@ exports.googleLogin = async (req, res) => {
             return res.status(400).json({ message: 'Token is required' });
         }
         const { user, token: appToken } = await userService.googleLoginUser(token);
-        res.cookie("token", appToken, {
-            httpOnly: true,
-            secure: false,
-            sameSite: "lax",
-            maxAge: 7 * 24 * 60 * 60 * 1000
-        });
+        res.cookie("token", appToken, cookieOptions);
         res.status(200).json({ message: 'Login successful', user, token: appToken });
     } catch (error) {
         console.error('Error during Google login:', error);
@@ -55,11 +60,7 @@ exports.googleLogin = async (req, res) => {
 };
 
 exports.logout = async (req, res) => {
-    res.clearCookie("token", {
-        httpOnly: true,
-        secure: false,
-        sameSite: "lax",
-    });
+    res.clearCookie("token", clearCookieOptions);
     res.status(200).json({ message: "Logout successful" });
 };
 
