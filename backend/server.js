@@ -9,7 +9,8 @@ const PORT = 5000;
 
 app.use(express.json());
 app.use(cors({
-    origin: 'http://localhost:3000',
+    // origin: 'http://localhost:3000',
+      origin:  'https://quickcart-frontend-02pg.onrender.com',
     credentials: true,
 }));
 app.use(cookieParser());
