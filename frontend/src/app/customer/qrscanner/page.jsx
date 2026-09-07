@@ -4,11 +4,9 @@ import { useEffect, useRef, useState, useCallback, useMemo } from "react";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import { Html5Qrcode } from "html5-qrcode";
-import jsQR from "jsqr";
 import api from "@/lib/axios";
 import {
   Camera,
-  Upload,
   ShoppingCart,
   QrCode,
   Sparkles,
@@ -35,13 +33,11 @@ import {
 
 export default function ScanPage() {
   const scannerRef = useRef(null);
-  const fileInputRef = useRef(null);
 
   // Scanner & Scanning State
   const [isScanning, setIsScanning] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
   const [processingMsg, setProcessingMsg] = useState("");
-  const [isDragging, setIsDragging] = useState(false);
 
   // Success & Error Toasts
   const [lastScannedProduct, setLastScannedProduct] = useState(null);
@@ -152,6 +148,10 @@ export default function ScanPage() {
     setScanError(null);
 
     try {
+      setIsScanning(true);
+      // Allow DOM to render #reader container before starting Html5Qrcode
+      await new Promise((resolve) => setTimeout(resolve, 80));
+
       const scanner = new Html5Qrcode("reader");
       scannerRef.current = scanner;
 
@@ -165,11 +165,17 @@ export default function ScanPage() {
           await addProductToCart(decodedText);
         }
       );
-
-      setIsScanning(true);
     } catch (err) {
       console.error("Camera access error:", err);
-      setScanError("Camera not accessible. Please grant permission or upload a QR image.");
+      setScanError("Camera not accessible. Please grant camera permission.");
+      if (scannerRef.current) {
+        try {
+          await scannerRef.current.stop();
+          await scannerRef.current.clear();
+        } catch (_) {}
+        scannerRef.current = null;
+      }
+      setIsScanning(false);
     }
   };
 
@@ -182,90 +188,8 @@ export default function ScanPage() {
         console.error("Error stopping scanner:", err);
       }
       scannerRef.current = null;
-      setIsScanning(false);
     }
-  };
-
-  // Decode QR from image using jsQR
-  const processImageFile = (file) => {
-    if (!file) return;
-
-    if (!file.type.startsWith("image/")) {
-      setScanError("Please select a valid image file (PNG, JPG, JPEG, WEBP).");
-      return;
-    }
-
-    setIsProcessing(true);
-    setProcessingMsg("Processing uploaded QR image...");
-    setScanError(null);
-
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      const img = new window.Image();
-      img.onload = async () => {
-        try {
-          const canvas = document.createElement("canvas");
-          const ctx = canvas.getContext("2d");
-          canvas.width = img.width;
-          canvas.height = img.height;
-          ctx.drawImage(img, 0, 0, img.width, img.height);
-
-          const imageData = ctx.getImageData(0, 0, img.width, img.height);
-          const code = jsQR(imageData.data, imageData.width, imageData.height, {
-            inversionAttempts: "dontInvert",
-          });
-
-          if (code && code.data) {
-            await addProductToCart(code.data);
-          } else {
-            setScanError("QR not recognized in this image. Try another QR.");
-            setIsProcessing(false);
-          }
-        } catch (err) {
-          console.error("Error decoding QR with jsQR:", err);
-          setScanError("Could not decode QR code from the selected image.");
-          setIsProcessing(false);
-        }
-      };
-
-      img.onerror = () => {
-        setScanError("Invalid or corrupted image file. Please try another image.");
-        setIsProcessing(false);
-      };
-
-      img.src = e.target?.result;
-    };
-
-    reader.onerror = () => {
-      setScanError("Failed to read image file.");
-      setIsProcessing(false);
-    };
-
-    reader.readAsDataURL(file);
-  };
-
-  const handleImageUpload = (event) => {
-    const file = event.target.files?.[0];
-    if (file) processImageFile(file);
-    if (event.target) event.target.value = "";
-  };
-
-  // Drag and drop handlers
-  const handleDragOver = (e) => {
-    e.preventDefault();
-    setIsDragging(true);
-  };
-
-  const handleDragLeave = (e) => {
-    e.preventDefault();
-    setIsDragging(false);
-  };
-
-  const handleDrop = (e) => {
-    e.preventDefault();
-    setIsDragging(false);
-    const file = e.dataTransfer.files?.[0];
-    if (file) processImageFile(file);
+    setIsScanning(false);
   };
 
   // Cleanup scanner on unmount
@@ -571,7 +495,7 @@ export default function ScanPage() {
                   <span>Interactive Scanner Terminal</span>
                 </h2>
                 <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-                  Choose live device camera or drag & drop a product QR photo.
+                  Scan in-store shelf QR codes and packaging barcodes with your device camera.
                 </p>
               </div>
 
@@ -602,10 +526,10 @@ export default function ScanPage() {
             {/* Scanner Grid: Main Viewfinder (Left 7 Cols) + Cute Animated Smart Assistant Mascot (Right 5 Cols) */}
             <div className="grid grid-cols-1 md:grid-cols-12 gap-6 items-center">
               
-              {/* Left Viewfinder/Dropzone Area (7 Cols) */}
+              {/* Left Viewfinder Area (7 Cols) */}
               <div className="md:col-span-7 space-y-4">
-                {/* Option 1: Live Camera Viewfinder (When active) */}
-                {isScanning && (
+                {/* Live Camera Viewfinder (When active) */}
+                {isScanning ? (
                   <motion.div
                     initial={{ opacity: 0, scale: 0.96 }}
                     animate={{ opacity: 1, scale: 1 }}
@@ -630,50 +554,33 @@ export default function ScanPage() {
                     <div id="reader" className="w-full min-h-[300px] rounded-2xl overflow-hidden" />
                     <div className="mt-3 text-center text-xs text-blue-200 font-bold py-1 flex items-center justify-center gap-2">
                       <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
-                      <span>Aim barcode within the box</span>
+                      <span>Aim barcode or shelf QR within the box</span>
                     </div>
                   </motion.div>
-                )}
-
-                {/* Option 2: Upload QR Image Drop Zone */}
-                {!isScanning && (
+                ) : (
+                  /* Camera Ready Launcher Card (When not scanning) */
                   <div
-                    onDragOver={handleDragOver}
-                    onDragLeave={handleDragLeave}
-                    onDrop={handleDrop}
-                    onClick={() => fileInputRef.current?.click()}
-                    className={`relative rounded-[32px] border-2 border-dashed p-7 text-center transition-all duration-300 cursor-pointer flex flex-col items-center justify-center ${
-                      isDragging
-                        ? "border-blue-500 bg-blue-50/80 dark:bg-blue-950/60 scale-[1.01] shadow-xl shadow-blue-500/20"
-                        : "border-slate-300 dark:border-slate-700 hover:border-blue-400 dark:hover:border-blue-500 bg-slate-50/60 dark:bg-slate-800/40 hover:bg-blue-50/30 dark:hover:bg-slate-800/70"
-                    }`}
+                    onClick={startScanner}
+                    className="relative rounded-[32px] border-2 border-slate-300 dark:border-slate-700 hover:border-blue-500 dark:hover:border-blue-400 bg-slate-50/60 dark:bg-slate-800/40 hover:bg-blue-50/40 dark:hover:bg-slate-800/70 p-8 text-center transition-all duration-300 cursor-pointer flex flex-col items-center justify-center group"
                   >
-                    <input
-                      type="file"
-                      accept="image/*"
-                      ref={fileInputRef}
-                      onChange={handleImageUpload}
-                      className="hidden"
-                    />
-
                     <motion.div
                       animate={{ y: [0, -5, 0] }}
                       transition={{ duration: 2.5, repeat: Infinity, ease: "easeInOut" }}
-                      className="w-16 h-16 rounded-2xl bg-gradient-to-tr from-blue-600 via-indigo-600 to-violet-600 text-white flex items-center justify-center shadow-xl shadow-blue-500/30 mb-3 border border-white/20"
+                      className="w-16 h-16 rounded-2xl bg-gradient-to-tr from-blue-600 via-indigo-600 to-violet-600 text-white flex items-center justify-center shadow-xl shadow-blue-500/30 mb-3 border border-white/20 group-hover:scale-105 transition-transform"
                     >
-                      <QrCode size={30} />
+                      <Camera size={30} />
                     </motion.div>
 
                     <h3 className="text-sm sm:text-base font-black text-slate-900 dark:text-white">
-                      Drop QR Image Here, or <span className="text-blue-600 dark:text-blue-400 underline">Browse</span>
+                      Camera Ready for QR Scanning
                     </h3>
                     <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-1 max-w-xs">
-                      PNG, JPG, JPEG, WEBP instant client decoding
+                      Uses webcam on desktop or rear camera on mobile devices
                     </p>
 
-                    <div className="mt-4 inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 text-xs font-bold shadow-sm hover:scale-105 transition-transform">
-                      <Upload size={14} className="text-blue-600 dark:text-blue-400" />
-                      <span>Upload QR Photo</span>
+                    <div className="mt-4 inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 text-white text-xs font-bold shadow-md shadow-blue-500/25 group-hover:shadow-blue-500/40 group-hover:scale-105 transition-all">
+                      <Camera size={14} />
+                      <span>Start Camera Scanner</span>
                     </div>
                   </div>
                 )}
@@ -985,7 +892,7 @@ export default function ScanPage() {
                 <ShoppingBag className="mx-auto text-slate-400 dark:text-slate-500 mb-2" size={32} />
                 <p className="text-xs font-bold text-slate-700 dark:text-slate-300">No scanned products yet.</p>
                 <p className="text-[11px] text-slate-400 dark:text-slate-500 mt-0.5">
-                  Aim camera at a shelf QR or upload a barcode photo to begin shopping.
+                  Aim camera at a shelf QR code to begin shopping.
                 </p>
               </div>
             ) : (
