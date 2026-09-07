@@ -554,11 +554,10 @@ export default function Login() {
                   initial={{ opacity: 0, y: -8, scale: 0.95 }}
                   animate={{ opacity: 1, y: 0, scale: 1 }}
                   exit={{ opacity: 0, y: -8, scale: 0.95 }}
-                  className={`mb-4 p-3.5 rounded-2xl border flex items-start gap-2.5 text-xs sm:text-sm shadow-sm ${
-                    status.type === "success"
+                  className={`mb-4 p-3.5 rounded-2xl border flex items-start gap-2.5 text-xs sm:text-sm shadow-sm ${status.type === "success"
                       ? "bg-emerald-50 dark:bg-emerald-950/80 border-emerald-200 dark:border-emerald-500/50 text-emerald-800 dark:text-emerald-200"
                       : "bg-rose-50 dark:bg-rose-950/80 border-rose-200 dark:border-rose-500/50 text-rose-800 dark:text-rose-200"
-                  }`}
+                    }`}
                 >
                   <div className="flex-shrink-0 mt-0.5">
                     {status.type === "success" ? (
@@ -644,11 +643,10 @@ export default function Login() {
                   disabled={loading || isSuccess}
                   whileHover={!loading && !isSuccess ? { scale: 1.02, y: -1 } : {}}
                   whileTap={!loading && !isSuccess ? { scale: 0.98 } : {}}
-                  className={`w-full relative overflow-hidden text-white font-bold py-3.5 rounded-2xl text-sm transition-all duration-200 cursor-pointer shadow-xl flex items-center justify-center gap-2 ${
-                    isSuccess
+                  className={`w-full relative overflow-hidden text-white font-bold py-3.5 rounded-2xl text-sm transition-all duration-200 cursor-pointer shadow-xl flex items-center justify-center gap-2 ${isSuccess
                       ? "bg-emerald-600 shadow-emerald-500/40 border border-emerald-400/50"
                       : "bg-gradient-to-r from-blue-600 via-indigo-600 to-violet-600 hover:from-blue-700 hover:via-indigo-700 hover:to-violet-700 shadow-blue-600/30 hover:shadow-blue-600/50 border border-blue-400/30 disabled:opacity-60 disabled:cursor-not-allowed"
-                  }`}
+                    }`}
                 >
                   {/* Shimmer Sweep Light Beam */}
                   <div className="absolute inset-0 -translate-x-full hover:translate-x-full bg-gradient-to-r from-transparent via-white/20 to-transparent transition-transform duration-1000 pointer-events-none" />
@@ -788,8 +786,7 @@ export default function Login() {
                       ease: "easeOut",
                       delay: (i % 6) * 0.08,
                     }}
-                    className={`absolute w-2 h-2 rounded-sm ${
-                      [
+                    className={`absolute w-2 h-2 rounded-sm ${[
                         "bg-blue-400",
                         "bg-emerald-400",
                         "bg-amber-400",
@@ -797,7 +794,7 @@ export default function Login() {
                         "bg-cyan-400",
                         "bg-pink-400",
                       ][i % 6]
-                    }`}
+                      }`}
                   />
                 ))}
               </div>
@@ -858,11 +855,10 @@ export default function Login() {
                             : { opacity: 0.3, scale: 0.8 }
                         }
                         transition={{ duration: 0.35 }}
-                        className={`p-2 rounded-xl flex flex-col items-center gap-1 border transition-all ${
-                          scannedItemsCount >= item.count
+                        className={`p-2 rounded-xl flex flex-col items-center gap-1 border transition-all ${scannedItemsCount >= item.count
                             ? "bg-blue-950/80 border-cyan-400/60 shadow-lg shadow-cyan-500/20 text-white"
                             : "bg-slate-900/40 border-slate-800 text-slate-500"
-                        }`}
+                          }`}
                       >
                         <span className="text-2xl">{item.icon}</span>
                         <span className="text-[10px] font-bold">{item.name}</span>

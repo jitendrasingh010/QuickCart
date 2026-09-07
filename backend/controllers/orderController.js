@@ -7,7 +7,7 @@ exports.createOrder = async (req, res) => {
             ...req.body,
             userId,
         });
-    console.log(">>>>>>>>",order)
+        console.log(">>>>>>>>", order)
 
         return res.status(201).json({
             success: true,

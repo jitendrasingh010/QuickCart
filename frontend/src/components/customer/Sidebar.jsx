@@ -16,7 +16,7 @@ import {
   X,
 } from "lucide-react";
 
-export default function Sidebar({ isOpen = false, onClose = () => {} }) {
+export default function Sidebar({ isOpen = false, onClose = () => { } }) {
   const pathname = usePathname();
   const router = useRouter();
 
@@ -111,11 +111,10 @@ export default function Sidebar({ isOpen = false, onClose = () => {} }) {
                 key={item.name}
                 href={item.href}
                 onClick={onClose}
-                className={`flex items-center gap-3 px-3.5 py-2.5 rounded-xl font-semibold text-xs sm:text-sm transition-all duration-200 group relative ${
-                  isActive
+                className={`flex items-center gap-3 px-3.5 py-2.5 rounded-xl font-semibold text-xs sm:text-sm transition-all duration-200 group relative ${isActive
                     ? "bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-md shadow-blue-600/25"
                     : "text-slate-400 hover:text-slate-100 hover:bg-slate-800/60"
-                }`}
+                  }`}
               >
                 {/* Animated active indicator bar */}
                 {isActive && (
@@ -128,9 +127,8 @@ export default function Sidebar({ isOpen = false, onClose = () => {} }) {
 
                 <Icon
                   size={18}
-                  className={`transition-transform duration-200 ${
-                    isActive ? "text-white" : "text-slate-400 group-hover:text-slate-200 group-hover:scale-110"
-                  }`}
+                  className={`transition-transform duration-200 ${isActive ? "text-white" : "text-slate-400 group-hover:text-slate-200 group-hover:scale-110"
+                    }`}
                 />
                 <span>{item.name}</span>
 

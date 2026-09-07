@@ -21,7 +21,7 @@ import api from "@/lib/axios";
 import { logout } from "@/services/authServices";
 import { useTheme } from "@/hooks/useTheme";
 
-export default function Navbar({ onToggleSidebar = () => {} }) {
+export default function Navbar({ onToggleSidebar = () => { } }) {
   const router = useRouter();
   const pathname = usePathname();
   const { theme, toggleTheme } = useTheme();
@@ -174,11 +174,10 @@ export default function Navbar({ onToggleSidebar = () => {} }) {
             <button
               type="button"
               onClick={() => setIsDropdownOpen((prev) => !prev)}
-              className={`flex items-center gap-2.5 sm:gap-3 p-1.5 sm:px-3 rounded-2xl transition-all duration-200 cursor-pointer border ${
-                isDropdownOpen
+              className={`flex items-center gap-2.5 sm:gap-3 p-1.5 sm:px-3 rounded-2xl transition-all duration-200 cursor-pointer border ${isDropdownOpen
                   ? "bg-slate-100/90 dark:bg-slate-800 border-slate-300/80 dark:border-slate-700 shadow-xs"
                   : "bg-transparent hover:bg-slate-100/80 dark:hover:bg-slate-800 border-transparent hover:border-slate-200 dark:hover:border-slate-700"
-              }`}
+                }`}
             >
               <div className="relative">
                 <motion.div

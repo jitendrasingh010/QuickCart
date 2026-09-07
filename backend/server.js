@@ -11,27 +11,27 @@ const PORT = 5000;
 app.use(express.json());
 app.use(cors({
     // origin: 'http://localhost:3000',
-      origin:  'https://quickcart-frontend-02pg.onrender.com',
+    origin: 'https://quickcart-frontend-02pg.onrender.com',
     credentials: true,
 }));
 app.use(cookieParser());
 db.sequelize.authenticate()
-  .then(() => {
-    console.log("✅ Database Connected Successfully");
+    .then(() => {
+        console.log("✅ Database Connected Successfully");
 
-    return db.sequelize.sync();
-  })
-  .then(() => {
-    console.log("✅ Tables Synced Successfully");
+        return db.sequelize.sync();
+    })
+    .then(() => {
+        console.log("✅ Tables Synced Successfully");
 
-    app.listen(PORT, () => {
-      console.log(`Server is running on port ${PORT}`);
+        app.listen(PORT, () => {
+            console.log(`Server is running on port ${PORT}`);
+        });
+    })
+    .catch((err) => {
+        console.error("❌ Database Connection Failed");
+        console.error(err);
     });
-  })
-  .catch((err) => {
-    console.error("❌ Database Connection Failed");
-    console.error(err);
-  });
 const userRoutes = require('./routes/userRoute.js');
 app.use('/userapi', userRoutes);
 
