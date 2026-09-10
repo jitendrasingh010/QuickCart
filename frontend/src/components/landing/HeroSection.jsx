@@ -43,12 +43,8 @@ export default function HeroSection() {
       id="hero"
       className="relative min-h-screen flex items-center justify-center overflow-hidden pt-28 pb-20 sm:pt-32 sm:pb-24 transition-colors duration-300"
     >
-      {/* ========================================================================= */}
-      {/* 🌌 CONTINUOUS FUTURISTIC AMBIENT ANIMATED BACKGROUND                     */}
-      {/* ========================================================================= */}
       <div className="absolute inset-0 bg-slate-50/70 dark:bg-[#060b18] transition-colors duration-300" />
 
-      {/* Moving Gradient Meshes */}
       <div className="absolute inset-0 pointer-events-none overflow-hidden">
         <motion.div
           animate={{
@@ -79,7 +75,6 @@ export default function HeroSection() {
           className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[750px] h-[750px] bg-blue-400/10 dark:bg-blue-500/10 rounded-full blur-[150px]"
         />
 
-        {/* Subtle Isometric Technical Grid */}
         <div
           className="absolute inset-0 opacity-[0.03] dark:opacity-[0.05]"
           style={{
@@ -89,7 +84,6 @@ export default function HeroSection() {
           }}
         />
 
-        {/* Floating Particles */}
         {[
           { top: "18%", left: "14%", size: "w-2 h-2", color: "bg-blue-400/60 dark:bg-blue-400", duration: 7 },
           { top: "75%", left: "8%", size: "w-1.5 h-1.5", color: "bg-indigo-400/60 dark:bg-indigo-400", duration: 9 },
@@ -109,15 +103,8 @@ export default function HeroSection() {
         ))}
       </div>
 
-      {/* ========================================================================= */}
-      {/* 🌟 2-COLUMN HERO SHOWCASE                                                  */}
-      {/* ========================================================================= */}
       <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-8 items-center">
-
-          {/* ─────────────────────────────────────────────────────────────────── */}
-          {/* 🚀 LEFT COLUMN: HEADLINE, MISSION & CALL TO ACTION (6 Cols)        */}
-          {/* ─────────────────────────────────────────────────────────────────── */}
           <motion.div
             initial={{ opacity: 0, x: -30 }}
             animate={{ opacity: 1, x: 0 }}
@@ -186,9 +173,6 @@ export default function HeroSection() {
             </div>
           </motion.div>
 
-          {/* ─────────────────────────────────────────────────────────────────── */}
-          {/* 🛒 RIGHT COLUMN: SPECIAL CONTINUOUS SELF-CHECKOUT SIMULATION (6 Cols) */}
-          {/* ─────────────────────────────────────────────────────────────────── */}
           <motion.div
             initial={{ opacity: 0, scale: 0.95, y: 30 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}

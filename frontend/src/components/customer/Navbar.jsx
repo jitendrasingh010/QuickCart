@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, memo } from "react";
 import Link from "next/link";
 import { useRouter, usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
@@ -21,7 +21,7 @@ import api from "@/lib/axios";
 import { logout } from "@/services/authServices";
 import { useTheme } from "@/hooks/useTheme";
 
-export default function Navbar({ onToggleSidebar = () => { } }) {
+function Navbar({ onToggleSidebar = () => { } }) {
   const router = useRouter();
   const pathname = usePathname();
   const { theme, toggleTheme } = useTheme();
@@ -364,3 +364,5 @@ export default function Navbar({ onToggleSidebar = () => { } }) {
     </>
   );
 }
+
+export default memo(Navbar);

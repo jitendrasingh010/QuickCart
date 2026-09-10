@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useMemo } from "react";
+import React, { useEffect, useState, useMemo, useCallback } from "react";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import CountUp from "react-countup";
@@ -71,8 +71,6 @@ ChartJS.register(
 export default function AdminDashboard() {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
-  const [currentTime, setCurrentTime] = useState("");
-  const [currentDate, setCurrentDate] = useState("");
 
   // Live Backend Data States
   const [products, setProducts] = useState([]);
@@ -81,35 +79,8 @@ export default function AdminDashboard() {
   const [customers, setCustomers] = useState([]);
   const [adminProfile, setAdminProfile] = useState(null);
 
-  // Live ticking clock
-  useEffect(() => {
-    const updateDateTime = () => {
-      const now = new Date();
-      setCurrentTime(
-        now.toLocaleTimeString("en-US", {
-          hour: "2-digit",
-          minute: "2-digit",
-          second: "2-digit",
-          hour12: true,
-        })
-      );
-      setCurrentDate(
-        now.toLocaleDateString("en-US", {
-          weekday: "long",
-          year: "numeric",
-          month: "short",
-          day: "numeric",
-        })
-      );
-    };
-
-    updateDateTime();
-    const timer = setInterval(updateDateTime, 1000);
-    return () => clearInterval(timer);
-  }, []);
-
   // Fetch all live backend data concurrently
-  const fetchDashboardData = async (isManual = false) => {
+  const fetchDashboardData = useCallback(async (isManual = false) => {
     if (isManual) setRefreshing(true);
 
     try {
@@ -155,11 +126,11 @@ export default function AdminDashboard() {
       setLoading(false);
       setRefreshing(false);
     }
-  };
+  }, []);
 
   useEffect(() => {
     fetchDashboardData();
-  }, []);
+  }, [fetchDashboardData]);
 
   // Time-based Greeting
   const greeting = useMemo(() => {
@@ -275,7 +246,7 @@ export default function AdminDashboard() {
   }, [orders]);
 
   // Line Chart Config (Revenue Trend)
-  const revenueChartConfig = {
+  const revenueChartConfig = useMemo(() => ({
     labels: last7DaysChartData.labels,
     datasets: [
       {
@@ -292,7 +263,7 @@ export default function AdminDashboard() {
         pointHoverRadius: 6,
       },
     ],
-  };
+  }), [last7DaysChartData]);
 
   // Category Distribution Doughnut Data
   const categoryChartData = useMemo(() => {
@@ -393,12 +364,7 @@ export default function AdminDashboard() {
 
           {/* Live Date, Time & Operational Status */}
           <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.25, duration: 0.5 }} className="flex flex-col sm:flex-row md:flex-col items-start md:items-end gap-3">
-            <div className="flex items-center gap-2.5 bg-white/10 backdrop-blur-md px-4 py-2 rounded-2xl border border-white/15 text-xs font-semibold text-slate-200 shadow-sm">
-              <Clock size={14} className="text-blue-400" />
-              <span>{currentTime || "Synchronizing..."}</span>
-              <span className="text-slate-400">•</span>
-              <span>{currentDate}</span>
-            </div>
+            <LiveClock />
 
             <div className="flex items-center gap-2.5">
               <div className="flex items-center gap-2 bg-emerald-500/15 border border-emerald-500/30 px-3.5 py-1.5 rounded-2xl text-[11px] font-bold text-emerald-300 shadow-sm">
@@ -1177,9 +1143,53 @@ export default function AdminDashboard() {
 }
 
 // ==========================================
+// ⏰ Isolated Live Clock Component
+// Keeps 1-second interval ticking isolated to prevent dashboard re-renders
+// ==========================================
+const LiveClock = React.memo(function LiveClock() {
+  const [currentTime, setCurrentTime] = useState("");
+  const [currentDate, setCurrentDate] = useState("");
+
+  useEffect(() => {
+    const updateDateTime = () => {
+      const now = new Date();
+      setCurrentTime(
+        now.toLocaleTimeString("en-US", {
+          hour: "2-digit",
+          minute: "2-digit",
+          second: "2-digit",
+          hour12: true,
+        })
+      );
+      setCurrentDate(
+        now.toLocaleDateString("en-US", {
+          weekday: "long",
+          year: "numeric",
+          month: "short",
+          day: "numeric",
+        })
+      );
+    };
+
+    updateDateTime();
+    const timer = setInterval(updateDateTime, 1000);
+    return () => clearInterval(timer);
+  }, []);
+
+  return (
+    <div className="flex items-center gap-2.5 bg-white/10 backdrop-blur-md px-4 py-2 rounded-2xl border border-white/15 text-xs font-semibold text-slate-200 shadow-sm">
+      <Clock size={14} className="text-blue-400" />
+      <span>{currentTime || "Synchronizing..."}</span>
+      <span className="text-slate-400">•</span>
+      <span>{currentDate}</span>
+    </div>
+  );
+});
+
+// ==========================================
 // Reusable Stat Card Component with CountUp
 // ==========================================
-function StatCard({
+const StatCard = React.memo(function StatCard({
   icon: Icon,
   title,
   value = 0,
@@ -1259,12 +1269,12 @@ function StatCard({
       </Link>
     </motion.div>
   );
-}
+});
 
 // ==========================================
 // Revenue Period Row Component
 // ==========================================
-function RevenuePeriodRow({ label, value = 0, ordersCount, isHighlight = false }) {
+const RevenuePeriodRow = React.memo(function RevenuePeriodRow({ label, value = 0, ordersCount, isHighlight = false }) {
   return (
     <div
       className={`p-3.5 rounded-2xl flex items-center justify-between transition-all duration-200 ${
@@ -1287,4 +1297,4 @@ function RevenuePeriodRow({ label, value = 0, ordersCount, isHighlight = false }
       </p>
     </div>
   );
-}
+});

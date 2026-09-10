@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, memo } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
@@ -16,7 +16,7 @@ import {
   X,
 } from "lucide-react";
 
-export default function Sidebar({ isOpen = false, onClose = () => { } }) {
+function Sidebar({ isOpen = false, onClose = () => { } }) {
   const pathname = usePathname();
   const router = useRouter();
 
@@ -255,3 +255,5 @@ export default function Sidebar({ isOpen = false, onClose = () => { } }) {
     </>
   );
 }
+
+export default memo(Sidebar);

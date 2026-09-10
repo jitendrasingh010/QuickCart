@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useMemo, useCallback } from "react";
+import React, { useEffect, useState, useMemo, useCallback } from "react";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import api from "@/lib/axios";
@@ -51,25 +51,6 @@ export default function CustomerDashboard() {
   // Quick View Product Modal State
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
-
-  // Continuous Looping Shopping Journey Simulation Stage
-  // 0: Customer enters smart supermarket
-  // 1: Picks up smart cart & approaches shelf
-  // 2: Scans product #1 (🥑 Avocado) -> laser beam glow -> item flies into cart
-  // 3: Scans product #2 (🥛 Milk) -> cart count: 2
-  // 4: Scans product #3 (🥤 Juice) -> cart count: 3
-  // 5: Checkout screen & 1-click payment approved ✓
-  // 6: Digital E-Receipt generates -> customer exits store happily
-  const [journeyStage, setJourneyStage] = useState(0);
-
-  useEffect(() => {
-    const stageDurations = [2400, 2200, 2400, 2000, 2000, 2400, 2600];
-    const timer = setTimeout(() => {
-      setJourneyStage((prev) => (prev + 1) % stageDurations.length);
-    }, stageDurations[journeyStage]);
-
-    return () => clearTimeout(timer);
-  }, [journeyStage]);
 
   // 300ms debounce for search query
   useEffect(() => {
@@ -164,27 +145,27 @@ export default function CustomerDashboard() {
     });
   }, [products, category, priceFilter, availability]);
 
-  const clearFilters = () => {
+  const clearFilters = useCallback(() => {
     setSearch("");
     setSort("");
     setCategory("");
     setPriceFilter("");
     setAvailability("");
-  };
+  }, []);
 
   const hasActiveFilters = Boolean(
     search || sort || category || priceFilter || availability
   );
 
-  const handleOpenModal = (product) => {
+  const handleOpenModal = useCallback((product) => {
     setSelectedProduct(product);
     setIsModalOpen(true);
-  };
+  }, []);
 
-  const handleCloseModal = () => {
+  const handleCloseModal = useCallback(() => {
     setIsModalOpen(false);
     setSelectedProduct(null);
-  };
+  }, []);
 
   return (
     <div className="w-full flex flex-col space-y-10 max-w-7xl mx-auto pb-20 select-none font-sans">
@@ -289,204 +270,7 @@ export default function CustomerDashboard() {
       {/* ========================================================================= */}
       {/* 🛒 MAIN CONTINUOUS SELF-CHECKOUT SHOPPING JOURNEY ANIMATION (FLAGSHIP)    */}
       {/* ========================================================================= */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.3, duration: 0.5 }}
-        className="relative bg-white/80 dark:bg-slate-900/80 backdrop-blur-3xl rounded-[36px] p-7 sm:p-9 border border-slate-200/80 dark:border-slate-800 shadow-2xl shadow-slate-900/5 dark:shadow-slate-950/40 overflow-hidden"
-      >
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-5 mb-6 border-b border-slate-100 dark:border-slate-800 gap-3">
-          <div>
-            <div className="flex items-center gap-2">
-              <div className="w-9 h-9 rounded-2xl bg-blue-600 text-white flex items-center justify-center shadow-md shadow-blue-500/25">
-                <Store size={18} />
-              </div>
-              <div>
-                <h2 className="text-base sm:text-lg font-black text-slate-900 dark:text-white">
-                  Continuous Self-Checkout Journey Simulation
-                </h2>
-                <p className="text-xs text-slate-500 dark:text-slate-400">
-                  Visual demonstration of how autonomous QR shopping flows in real time
-                </p>
-              </div>
-            </div>
-          </div>
-
-          <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-blue-50 dark:bg-blue-950/60 border border-blue-200 dark:border-blue-800 text-[11px] font-bold text-blue-600 dark:text-blue-300 self-start sm:self-auto">
-            <span className="w-2 h-2 rounded-full bg-blue-500 animate-ping" />
-            <span>Interactive Live Demo</span>
-          </div>
-        </div>
-
-        {/* Central Stage Canvas */}
-        <div className="relative min-h-[220px] rounded-3xl bg-gradient-to-r from-blue-950/70 via-slate-950 to-indigo-950/70 border border-blue-500/20 p-6 flex flex-col items-center justify-center text-white overflow-hidden shadow-inner">
-          
-          {/* Subtle Ambient Laser Line */}
-          <div className="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-cyan-400/50 to-transparent" />
-
-          <AnimatePresence mode="wait">
-            {/* Stage 0: Customer enters store */}
-            {journeyStage === 0 && (
-              <motion.div
-                key="stage-0"
-                initial={{ opacity: 0, x: -50 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: 50 }}
-                transition={{ duration: 0.4 }}
-                className="text-center space-y-3"
-              >
-                <div className="text-5xl animate-bounce">🚶‍♂️🛒</div>
-                <div className="px-4 py-2 bg-blue-600/30 border border-blue-400/40 rounded-2xl text-xs sm:text-sm font-bold text-blue-200 backdrop-blur-md">
-                  Step 1: Shopper enters Smart Supermarket & takes shopping cart
-                </div>
-              </motion.div>
-            )}
-
-            {/* Stage 1: Moving Cart */}
-            {journeyStage === 1 && (
-              <motion.div
-                key="stage-1"
-                initial={{ opacity: 0, scale: 0.9 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0 }}
-                transition={{ duration: 0.4 }}
-                className="text-center space-y-3"
-              >
-                <div className="text-5xl">🛒 ➡️ 🏪</div>
-                <div className="px-4 py-2 bg-indigo-600/30 border border-indigo-400/40 rounded-2xl text-xs sm:text-sm font-bold text-indigo-200 backdrop-blur-md">
-                  Step 2: Shopper browses aisles with smart digital cart
-                </div>
-              </motion.div>
-            )}
-
-            {/* Stage 2: Scanning Product #1 */}
-            {journeyStage === 2 && (
-              <motion.div
-                key="stage-2"
-                initial={{ opacity: 0, scale: 0.85 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0 }}
-                transition={{ duration: 0.4 }}
-                className="flex flex-col items-center space-y-3"
-              >
-                <div className="p-3.5 rounded-2xl bg-slate-900 border border-cyan-400 text-cyan-300 flex items-center gap-3 shadow-lg shadow-cyan-500/20">
-                  <QrCode size={26} className="animate-pulse text-cyan-400" />
-                  <div className="text-left">
-                    <span className="block text-[10px] font-mono text-cyan-400">QR SCAN DETECTED (0.2s)</span>
-                    <span className="block text-sm font-black text-white">🥑 Fresh Hass Avocado</span>
-                  </div>
-                  <span className="text-xs font-bold text-emerald-400 bg-emerald-950 px-2.5 py-1 rounded-lg">₹49</span>
-                </div>
-                <span className="text-xs font-bold text-cyan-300 flex items-center gap-1.5 animate-pulse">
-                  <span>Product smoothly glides into digital cart</span>
-                  <ArrowRight size={13} />
-                </span>
-              </motion.div>
-            )}
-
-            {/* Stage 3 & 4: Cart filling with multiple items */}
-            {(journeyStage === 3 || journeyStage === 4) && (
-              <motion.div
-                key="stage-3-4"
-                initial={{ opacity: 0, y: 15 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0 }}
-                transition={{ duration: 0.4 }}
-                className="w-full max-w-md space-y-3"
-              >
-                <div className="p-4 bg-slate-900/90 rounded-2xl border border-slate-700 shadow-xl">
-                  <div className="flex items-center justify-between text-xs font-bold mb-2.5">
-                    <span className="flex items-center gap-1.5 text-blue-400">
-                      <ShoppingCart size={16} />
-                      Live Digital Cart
-                    </span>
-                    <span className="bg-blue-600 text-white px-2.5 py-0.5 rounded-full text-[10px] font-black font-mono">
-                      {journeyStage === 3 ? "2 Items (₹129)" : "3 Items (₹199)"}
-                    </span>
-                  </div>
-
-                  <div className="grid grid-cols-3 gap-2 text-center">
-                    <div className="p-2 bg-slate-800 rounded-xl border border-slate-700">
-                      <span className="text-xl">🥑</span>
-                      <span className="block text-[10px] font-bold mt-0.5">Avocado</span>
-                    </div>
-                    <div className="p-2 bg-slate-800 rounded-xl border border-slate-700">
-                      <span className="text-xl">🥛</span>
-                      <span className="block text-[10px] font-bold mt-0.5">Milk</span>
-                    </div>
-                    <div className={`p-2 rounded-xl border transition-all ${
-                      journeyStage === 4
-                        ? "bg-slate-800 border-cyan-400 text-white"
-                        : "opacity-40 border-dashed border-slate-700"
-                    }`}>
-                      <span className="text-xl">🥤</span>
-                      <span className="block text-[10px] font-bold mt-0.5">Juice</span>
-                    </div>
-                  </div>
-                </div>
-              </motion.div>
-            )}
-
-            {/* Stage 5: Payment Approved */}
-            {journeyStage === 5 && (
-              <motion.div
-                key="stage-5"
-                initial={{ opacity: 0, scale: 0.9 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0 }}
-                transition={{ duration: 0.4 }}
-                className="p-5 rounded-2xl bg-emerald-950/80 border border-emerald-400/60 text-center space-y-2 shadow-2xl"
-              >
-                <div className="w-12 h-12 bg-emerald-500 text-white rounded-2xl flex items-center justify-center mx-auto shadow-lg shadow-emerald-500/30">
-                  <Check size={24} className="stroke-[3]" />
-                </div>
-                <h3 className="text-base font-black text-emerald-300">
-                  Payment Approved • ₹199.00
-                </h3>
-                <p className="text-xs text-emerald-400 font-medium">
-                  Razorpay UPI Instant Settlement ✓
-                </p>
-              </motion.div>
-            )}
-
-            {/* Stage 6: Digital Receipt & Exit */}
-            {journeyStage === 6 && (
-              <motion.div
-                key="stage-6"
-                initial={{ opacity: 0, y: 15 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0 }}
-                transition={{ duration: 0.4 }}
-                className="p-4 rounded-2xl bg-indigo-950/80 border border-indigo-400/50 text-center space-y-2"
-              >
-                <div className="flex items-center justify-center gap-2 text-indigo-300 font-bold text-xs">
-                  <Receipt size={16} />
-                  <span>Digital Invoice Dispatched</span>
-                </div>
-                <p className="text-xs font-bold text-slate-200">
-                  Shopper walks right out with zero queue waiting! 🛍️✨
-                </p>
-              </motion.div>
-            )}
-          </AnimatePresence>
-        </div>
-
-        {/* Bottom Sequence Bar */}
-        <div className="mt-5 pt-4 border-t border-slate-100 dark:border-slate-800 grid grid-cols-7 gap-1.5 text-center">
-          {["Enter", "Take Cart", "Scan #1", "Scan #2", "Cart Full", "1-Tap Pay", "Walk Out"].map((label, idx) => (
-            <div
-              key={idx}
-              className={`py-1.5 rounded-xl text-[10px] font-bold transition-all ${
-                journeyStage === idx
-                  ? "bg-blue-600 text-white shadow-md shadow-blue-500/20"
-                  : "bg-slate-100 dark:bg-slate-800/60 text-slate-500 dark:text-slate-400"
-              }`}
-            >
-              {label}
-            </div>
-          ))}
-        </div>
-      </motion.div>
+      <JourneySimulation />
 
       {/* ========================================================================= */}
       {/* ⚡ 5 PREMIUM FEATURE HIGHLIGHT CARDS                                       */}
@@ -743,124 +527,13 @@ export default function CustomerDashboard() {
             variants={{ hidden: {}, visible: { transition: { staggerChildren: 0.05 } } }}
             className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"
           >
-            {filteredProducts.map((product) => {
-              const categoryName =
-                product.Category?.categoryName ||
-                product.category?.categoryName ||
-                product.categoryName ||
-                "General";
-              const imageUrl = product.productImage || product.image;
-              const inStock = Number(product.stock || 0) > 0;
-
-              return (
-                <motion.div
-                  key={product.productId || product._id || product.id}
-                  variants={{ hidden: { opacity: 0, y: 20, scale: 0.97 }, visible: { opacity: 1, y: 0, scale: 1 } }}
-                  transition={{ duration: 0.35, ease: "easeOut" }}
-                  className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-2xl rounded-3xl shadow-sm hover:shadow-2xl hover:shadow-blue-500/10 hover:-translate-y-1.5 border border-slate-200/80 dark:border-slate-800 hover:border-blue-300 dark:hover:border-blue-700 overflow-hidden flex flex-col justify-between group transition-all duration-300"
-                >
-                  {/* Top Image Canvas */}
-                  <div className="relative h-48 sm:h-52 bg-gradient-to-b from-slate-50 to-slate-100/70 dark:from-slate-900 dark:to-slate-800/70 p-4 flex items-center justify-center overflow-hidden">
-                    {imageUrl ? (
-                      <img
-                        src={imageUrl}
-                        alt={product.productName || "Product"}
-                        loading="lazy"
-                        className="max-h-full max-w-full object-contain group-hover:scale-110 transition-transform duration-500"
-                      />
-                    ) : (
-                      <div className="flex flex-col items-center justify-center text-slate-400 dark:text-slate-500 gap-1">
-                        <Package size={32} />
-                        <span className="text-[11px] font-medium">No Image</span>
-                      </div>
-                    )}
-
-                    {/* Top Badges: Category & Stock */}
-                    <div className="absolute top-3 left-3 right-3 flex items-center justify-between pointer-events-none">
-                      <span className="bg-white/95 dark:bg-slate-800/95 backdrop-blur-md text-blue-700 dark:text-blue-300 text-[10px] font-bold px-2.5 py-0.5 rounded-full shadow-xs border border-white/60 dark:border-slate-700 flex items-center gap-1">
-                        <Tag size={10} />
-                        <span>{categoryName}</span>
-                      </span>
-
-                      <span
-                        className={`text-[10px] px-2 py-0.5 rounded-full font-bold shadow-2xs backdrop-blur-md border ${
-                          inStock
-                            ? "bg-emerald-50/95 dark:bg-emerald-950/80 text-emerald-700 dark:text-emerald-300 border-emerald-200/60 dark:border-emerald-800/60"
-                            : "bg-rose-50/95 dark:bg-rose-950/80 text-rose-700 dark:text-rose-300 border-rose-200/60 dark:border-rose-800/60"
-                        }`}
-                      >
-                        {inStock ? `✓ In Stock` : "Out of Stock"}
-                      </span>
-                    </div>
-                  </div>
-
-                  {/* Card Content Details */}
-                  <div className="p-4 sm:p-5 flex-1 flex flex-col justify-between">
-                    <div>
-                      {/* Rating & Stock Counter */}
-                      <div className="flex items-center justify-between text-[11px] text-slate-400 dark:text-slate-500 mb-1">
-                        <div className="flex items-center gap-1 text-amber-500 font-bold">
-                          <Star size={12} fill="currentColor" />
-                          <span>4.9</span>
-                          <span className="text-slate-400 dark:text-slate-500 font-normal">(AI Verified)</span>
-                        </div>
-                        <span className="font-semibold text-slate-500 dark:text-slate-400">
-                          {inStock ? `${product.stock} units left` : "0 in stock"}
-                        </span>
-                      </div>
-
-                      {/* Title */}
-                      <h3 className="font-bold text-slate-900 dark:text-white text-sm sm:text-base line-clamp-1 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
-                        {product.productName || product.name}
-                      </h3>
-
-                      {/* Short Description */}
-                      <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 line-clamp-2 leading-relaxed">
-                        {product.description || "Available for immediate smart QR checkout in store."}
-                      </p>
-                    </div>
-
-                    {/* Price & Action Buttons */}
-                    <div className="mt-4 pt-3 border-t border-slate-100 dark:border-slate-800 space-y-3">
-                      <div className="flex items-baseline justify-between">
-                        <div>
-                          <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 block">
-                            Store Price
-                          </span>
-                          <span className="text-xl font-black text-slate-900 dark:text-white font-mono">
-                            ₹{Number(product.price || 0).toLocaleString()}
-                          </span>
-                        </div>
-
-                        <span className="text-[11px] font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/50 px-2 py-0.5 rounded-md border border-emerald-100 dark:border-emerald-800/40">
-                          QR Instant Pay
-                        </span>
-                      </div>
-
-                      {/* 2 Modern Action Buttons */}
-                      <div className="grid grid-cols-2 gap-2 pt-1">
-                        <button
-                          type="button"
-                          onClick={() => handleOpenModal(product)}
-                          className="inline-flex items-center justify-center gap-1.5 py-2 px-3 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 text-xs font-bold transition cursor-pointer"
-                        >
-                          <Eye size={13} />
-                          <span>Details</span>
-                        </button>
-
-                        <Link
-                          href="/customer/qrscanner"
-                          className="inline-flex items-center justify-center gap-1.5 py-2 px-3 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white text-xs font-bold shadow-md shadow-blue-500/20 hover:shadow-blue-500/35 transition cursor-pointer"
-                        >
-                          <QrCode size={13} />
-                          <span>Scan QR</span>
-                        </Link>
-                      </div>
-                    </div>
-                  </div>
-                </motion.div>
-              );
-            })}
+            {filteredProducts.map((product) => (
+              <ProductCard
+                key={product.productId || product._id || product.id}
+                product={product}
+                onOpenModal={handleOpenModal}
+              />
+            ))}
           </motion.div>
         )}
       </div>
@@ -987,3 +660,338 @@ export default function CustomerDashboard() {
     </div>
   );
 }
+
+// =========================================================================
+// 🛒 MEMOIZED CONTINUOUS SHOPPING JOURNEY SIMULATION COMPONENT
+// Isolates high-frequency timer state to prevent parent dashboard re-renders
+// =========================================================================
+const JourneySimulation = React.memo(function JourneySimulation() {
+  const [journeyStage, setJourneyStage] = useState(0);
+
+  useEffect(() => {
+    const stageDurations = [2400, 2200, 2400, 2000, 2000, 2400, 2600];
+    const timer = setTimeout(() => {
+      setJourneyStage((prev) => (prev + 1) % stageDurations.length);
+    }, stageDurations[journeyStage]);
+
+    return () => clearTimeout(timer);
+  }, [journeyStage]);
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ delay: 0.3, duration: 0.5 }}
+      className="relative bg-white/80 dark:bg-slate-900/80 backdrop-blur-3xl rounded-[36px] p-7 sm:p-9 border border-slate-200/80 dark:border-slate-800 shadow-2xl shadow-slate-900/5 dark:shadow-slate-950/40 overflow-hidden"
+    >
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-5 mb-6 border-b border-slate-100 dark:border-slate-800 gap-3">
+        <div>
+          <div className="flex items-center gap-2">
+            <div className="w-9 h-9 rounded-2xl bg-blue-600 text-white flex items-center justify-center shadow-md shadow-blue-500/25">
+              <Store size={18} />
+            </div>
+            <div>
+              <h2 className="text-base sm:text-lg font-black text-slate-900 dark:text-white">
+                Continuous Self-Checkout Journey Simulation
+              </h2>
+              <p className="text-xs text-slate-500 dark:text-slate-400">
+                Visual demonstration of how autonomous QR shopping flows in real time
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-blue-50 dark:bg-blue-950/60 border border-blue-200 dark:border-blue-800 text-[11px] font-bold text-blue-600 dark:text-blue-300 self-start sm:self-auto">
+          <span className="w-2 h-2 rounded-full bg-blue-500 animate-ping" />
+          <span>Interactive Live Demo</span>
+        </div>
+      </div>
+
+      {/* Central Stage Canvas */}
+      <div className="relative min-h-[220px] rounded-3xl bg-gradient-to-r from-blue-950/70 via-slate-950 to-indigo-950/70 border border-blue-500/20 p-6 flex flex-col items-center justify-center text-white overflow-hidden shadow-inner">
+        {/* Subtle Ambient Laser Line */}
+        <div className="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-cyan-400/50 to-transparent" />
+
+        <AnimatePresence mode="wait">
+          {journeyStage === 0 && (
+            <motion.div
+              key="stage-0"
+              initial={{ opacity: 0, x: -50 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: 50 }}
+              transition={{ duration: 0.4 }}
+              className="text-center space-y-3"
+            >
+              <div className="text-5xl animate-bounce">🚶‍♂️🛒</div>
+              <div className="px-4 py-2 bg-blue-600/30 border border-blue-400/40 rounded-2xl text-xs sm:text-sm font-bold text-blue-200 backdrop-blur-md">
+                Step 1: Shopper enters Smart Supermarket & takes shopping cart
+              </div>
+            </motion.div>
+          )}
+
+          {journeyStage === 1 && (
+            <motion.div
+              key="stage-1"
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.4 }}
+              className="text-center space-y-3"
+            >
+              <div className="text-5xl">🛒 ➡️ 🏪</div>
+              <div className="px-4 py-2 bg-indigo-600/30 border border-indigo-400/40 rounded-2xl text-xs sm:text-sm font-bold text-indigo-200 backdrop-blur-md">
+                Step 2: Shopper browses aisles with smart digital cart
+              </div>
+            </motion.div>
+          )}
+
+          {journeyStage === 2 && (
+            <motion.div
+              key="stage-2"
+              initial={{ opacity: 0, scale: 0.85 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.4 }}
+              className="flex flex-col items-center space-y-3"
+            >
+              <div className="p-3.5 rounded-2xl bg-slate-900 border border-cyan-400 text-cyan-300 flex items-center gap-3 shadow-lg shadow-cyan-500/20">
+                <QrCode size={26} className="animate-pulse text-cyan-400" />
+                <div className="text-left">
+                  <span className="block text-[10px] font-mono text-cyan-400">QR SCAN DETECTED (0.2s)</span>
+                  <span className="block text-sm font-black text-white">🥑 Fresh Hass Avocado</span>
+                </div>
+                <span className="text-xs font-bold text-emerald-400 bg-emerald-950 px-2.5 py-1 rounded-lg">₹49</span>
+              </div>
+              <span className="text-xs font-bold text-cyan-300 flex items-center gap-1.5 animate-pulse">
+                <span>Product smoothly glides into digital cart</span>
+                <ArrowRight size={13} />
+              </span>
+            </motion.div>
+          )}
+
+          {(journeyStage === 3 || journeyStage === 4) && (
+            <motion.div
+              key="stage-3-4"
+              initial={{ opacity: 0, y: 15 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.4 }}
+              className="w-full max-w-md space-y-3"
+            >
+              <div className="p-4 bg-slate-900/90 rounded-2xl border border-slate-700 shadow-xl">
+                <div className="flex items-center justify-between text-xs font-bold mb-2.5">
+                  <span className="flex items-center gap-1.5 text-blue-400">
+                    <ShoppingCart size={16} />
+                    Live Digital Cart
+                  </span>
+                  <span className="bg-blue-600 text-white px-2.5 py-0.5 rounded-full text-[10px] font-black font-mono">
+                    {journeyStage === 3 ? "2 Items (₹129)" : "3 Items (₹199)"}
+                  </span>
+                </div>
+
+                <div className="grid grid-cols-3 gap-2 text-center">
+                  <div className="p-2 bg-slate-800 rounded-xl border border-slate-700">
+                    <span className="text-xl">🥑</span>
+                    <span className="block text-[10px] font-bold mt-0.5">Avocado</span>
+                  </div>
+                  <div className="p-2 bg-slate-800 rounded-xl border border-slate-700">
+                    <span className="text-xl">🥛</span>
+                    <span className="block text-[10px] font-bold mt-0.5">Milk</span>
+                  </div>
+                  <div
+                    className={`p-2 rounded-xl border transition-all ${
+                      journeyStage === 4
+                        ? "bg-slate-800 border-cyan-400 text-white"
+                        : "opacity-40 border-dashed border-slate-700"
+                    }`}
+                  >
+                    <span className="text-xl">🥤</span>
+                    <span className="block text-[10px] font-bold mt-0.5">Juice</span>
+                  </div>
+                </div>
+              </div>
+            </motion.div>
+          )}
+
+          {journeyStage === 5 && (
+            <motion.div
+              key="stage-5"
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.4 }}
+              className="p-5 rounded-2xl bg-emerald-950/80 border border-emerald-400/60 text-center space-y-2 shadow-2xl"
+            >
+              <div className="w-12 h-12 bg-emerald-500 text-white rounded-2xl flex items-center justify-center mx-auto shadow-lg shadow-emerald-500/30">
+                <Check size={24} className="stroke-[3]" />
+              </div>
+              <h3 className="text-base font-black text-emerald-300">
+                Payment Approved • ₹199.00
+              </h3>
+              <p className="text-xs text-emerald-400 font-medium">
+                Razorpay UPI Instant Settlement ✓
+              </p>
+            </motion.div>
+          )}
+
+          {journeyStage === 6 && (
+            <motion.div
+              key="stage-6"
+              initial={{ opacity: 0, y: 15 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.4 }}
+              className="p-4 rounded-2xl bg-indigo-950/80 border border-indigo-400/50 text-center space-y-2"
+            >
+              <div className="flex items-center justify-center gap-2 text-indigo-300 font-bold text-xs">
+                <Receipt size={16} />
+                <span>Digital Invoice Dispatched</span>
+              </div>
+              <p className="text-xs font-bold text-slate-200">
+                Shopper walks right out with zero queue waiting! 🛍️✨
+              </p>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
+
+      {/* Bottom Sequence Bar */}
+      <div className="mt-5 pt-4 border-t border-slate-100 dark:border-slate-800 grid grid-cols-7 gap-1.5 text-center">
+        {["Enter", "Take Cart", "Scan #1", "Scan #2", "Cart Full", "1-Tap Pay", "Walk Out"].map((label, idx) => (
+          <div
+            key={idx}
+            className={`py-1.5 rounded-xl text-[10px] font-bold transition-all ${
+              journeyStage === idx
+                ? "bg-blue-600 text-white shadow-md shadow-blue-500/20"
+                : "bg-slate-100 dark:bg-slate-800/60 text-slate-500 dark:text-slate-400"
+            }`}
+          >
+            {label}
+          </div>
+        ))}
+      </div>
+    </motion.div>
+  );
+});
+
+// =========================================================================
+// 📦 MEMOIZED PRODUCT CARD COMPONENT
+// Prevents unnecessary re-renders of catalog cards when filters / modals change
+// =========================================================================
+const ProductCard = React.memo(function ProductCard({ product, onOpenModal }) {
+  const categoryName =
+    product.Category?.categoryName ||
+    product.category?.categoryName ||
+    product.categoryName ||
+    "General";
+  const imageUrl = product.productImage || product.image;
+  const inStock = Number(product.stock || 0) > 0;
+
+  return (
+    <motion.div
+      variants={{ hidden: { opacity: 0, y: 20, scale: 0.97 }, visible: { opacity: 1, y: 0, scale: 1 } }}
+      transition={{ duration: 0.35, ease: "easeOut" }}
+      className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-2xl rounded-3xl shadow-sm hover:shadow-2xl hover:shadow-blue-500/10 hover:-translate-y-1.5 border border-slate-200/80 dark:border-slate-800 hover:border-blue-300 dark:hover:border-blue-700 overflow-hidden flex flex-col justify-between group transition-all duration-300"
+    >
+      {/* Top Image Canvas */}
+      <div className="relative h-48 sm:h-52 bg-gradient-to-b from-slate-50 to-slate-100/70 dark:from-slate-900 dark:to-slate-800/70 p-4 flex items-center justify-center overflow-hidden">
+        {imageUrl ? (
+          <img
+            src={imageUrl}
+            alt={product.productName || "Product"}
+            loading="lazy"
+            className="max-h-full max-w-full object-contain group-hover:scale-110 transition-transform duration-500"
+          />
+        ) : (
+          <div className="flex flex-col items-center justify-center text-slate-400 dark:text-slate-500 gap-1">
+            <Package size={32} />
+            <span className="text-[11px] font-medium">No Image</span>
+          </div>
+        )}
+
+        {/* Top Badges: Category & Stock */}
+        <div className="absolute top-3 left-3 right-3 flex items-center justify-between pointer-events-none">
+          <span className="bg-white/95 dark:bg-slate-800/95 backdrop-blur-md text-blue-700 dark:text-blue-300 text-[10px] font-bold px-2.5 py-0.5 rounded-full shadow-xs border border-white/60 dark:border-slate-700 flex items-center gap-1">
+            <Tag size={10} />
+            <span>{categoryName}</span>
+          </span>
+
+          <span
+            className={`text-[10px] px-2 py-0.5 rounded-full font-bold shadow-2xs backdrop-blur-md border ${
+              inStock
+                ? "bg-emerald-50/95 dark:bg-emerald-950/80 text-emerald-700 dark:text-emerald-300 border-emerald-200/60 dark:border-emerald-800/60"
+                : "bg-rose-50/95 dark:bg-rose-950/80 text-rose-700 dark:text-rose-300 border-rose-200/60 dark:border-rose-800/60"
+            }`}
+          >
+            {inStock ? `✓ In Stock` : "Out of Stock"}
+          </span>
+        </div>
+      </div>
+
+      {/* Card Content Details */}
+      <div className="p-4 sm:p-5 flex-1 flex flex-col justify-between">
+        <div>
+          {/* Rating & Stock Counter */}
+          <div className="flex items-center justify-between text-[11px] text-slate-400 dark:text-slate-500 mb-1">
+            <div className="flex items-center gap-1 text-amber-500 font-bold">
+              <Star size={12} fill="currentColor" />
+              <span>4.9</span>
+              <span className="text-slate-400 dark:text-slate-500 font-normal">(AI Verified)</span>
+            </div>
+            <span className="font-semibold text-slate-500 dark:text-slate-400">
+              {inStock ? `${product.stock} units left` : "0 in stock"}
+            </span>
+          </div>
+
+          {/* Title */}
+          <h3 className="font-bold text-slate-900 dark:text-white text-sm sm:text-base line-clamp-1 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
+            {product.productName || product.name}
+          </h3>
+
+          {/* Short Description */}
+          <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 line-clamp-2 leading-relaxed">
+            {product.description || "Available for immediate smart QR checkout in store."}
+          </p>
+        </div>
+
+        {/* Price & Action Buttons */}
+        <div className="mt-4 pt-3 border-t border-slate-100 dark:border-slate-800 space-y-3">
+          <div className="flex items-baseline justify-between">
+            <div>
+              <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 block">
+                Store Price
+              </span>
+              <span className="text-xl font-black text-slate-900 dark:text-white font-mono">
+                ₹{Number(product.price || 0).toLocaleString()}
+              </span>
+            </div>
+
+            <span className="text-[11px] font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/50 px-2 py-0.5 rounded-md border border-emerald-100 dark:border-emerald-800/40">
+              QR Instant Pay
+            </span>
+          </div>
+
+          {/* 2 Modern Action Buttons */}
+          <div className="grid grid-cols-2 gap-2 pt-1">
+            <button
+              type="button"
+              onClick={() => onOpenModal(product)}
+              className="inline-flex items-center justify-center gap-1.5 py-2 px-3 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 text-xs font-bold transition cursor-pointer"
+            >
+              <Eye size={13} />
+              <span>Details</span>
+            </button>
+
+            <Link
+              href="/customer/qrscanner"
+              className="inline-flex items-center justify-center gap-1.5 py-2 px-3 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white text-xs font-bold shadow-md shadow-blue-500/20 hover:shadow-blue-500/35 transition cursor-pointer"
+            >
+              <QrCode size={13} />
+              <span>Scan QR</span>
+            </Link>
+          </div>
+        </div>
+      </div>
+    </motion.div>
+  );
+});

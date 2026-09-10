@@ -151,25 +151,21 @@ input.bg-gray-50:-webkit-autofill {
   bottom: 0;
   left: 0;
   transform: translateX(-100%);
-  background-image: linear-gradient(
-    90deg,
-    rgba(255, 255, 255, 0) 0,
-    rgba(255, 255, 255, 0.4) 20%,
-    rgba(255, 255, 255, 0.6) 60%,
-    rgba(255, 255, 255, 0)
-  );
+  background-image: linear-gradient(90deg,
+      rgba(255, 255, 255, 0) 0,
+      rgba(255, 255, 255, 0.4) 20%,
+      rgba(255, 255, 255, 0.6) 60%,
+      rgba(255, 255, 255, 0));
   animation: shimmer 1.5s infinite;
   content: "";
 }
 
 .dark .shimmer-placeholder::after {
-  background-image: linear-gradient(
-    90deg,
-    rgba(30, 41, 59, 0) 0,
-    rgba(51, 65, 85, 0.5) 20%,
-    rgba(51, 65, 85, 0.8) 60%,
-    rgba(30, 41, 59, 0)
-  );
+  background-image: linear-gradient(90deg,
+      rgba(30, 41, 59, 0) 0,
+      rgba(51, 65, 85, 0.5) 20%,
+      rgba(51, 65, 85, 0.8) 60%,
+      rgba(30, 41, 59, 0));
 }
 
 /* ==========================================================================
@@ -178,84 +174,180 @@ input.bg-gray-50:-webkit-autofill {
 
 /* Gentle floating effect for cards and icons */
 @keyframes float {
-  0%, 100% { transform: translateY(0px); }
-  50% { transform: translateY(-8px); }
+
+  0%,
+  100% {
+    transform: translateY(0px);
+  }
+
+  50% {
+    transform: translateY(-8px);
+  }
 }
 
 /* Subtle glow pulse for borders and badges */
 @keyframes glow-pulse {
-  0%, 100% { box-shadow: 0 0 5px rgba(59, 130, 246, 0.3); }
-  50% { box-shadow: 0 0 20px rgba(59, 130, 246, 0.6), 0 0 40px rgba(59, 130, 246, 0.2); }
+
+  0%,
+  100% {
+    box-shadow: 0 0 5px rgba(59, 130, 246, 0.3);
+  }
+
+  50% {
+    box-shadow: 0 0 20px rgba(59, 130, 246, 0.6), 0 0 40px rgba(59, 130, 246, 0.2);
+  }
 }
 
 /* QR scanner line animation — moves top to bottom */
 @keyframes scanner-line {
-  0% { top: 0%; }
-  50% { top: calc(100% - 3px); }
-  100% { top: 0%; }
+  0% {
+    top: 0%;
+  }
+
+  50% {
+    top: calc(100% - 3px);
+  }
+
+  100% {
+    top: 0%;
+  }
 }
 
 /* Sparkle burst for successful actions */
 @keyframes sparkle {
-  0% { transform: scale(0) rotate(0deg); opacity: 1; }
-  50% { transform: scale(1.2) rotate(180deg); opacity: 0.8; }
-  100% { transform: scale(0) rotate(360deg); opacity: 0; }
+  0% {
+    transform: scale(0) rotate(0deg);
+    opacity: 1;
+  }
+
+  50% {
+    transform: scale(1.2) rotate(180deg);
+    opacity: 0.8;
+  }
+
+  100% {
+    transform: scale(0) rotate(360deg);
+    opacity: 0;
+  }
 }
 
 /* Confetti particles falling */
 @keyframes confetti-fall {
-  0% { transform: translateY(-100%) rotate(0deg); opacity: 1; }
-  100% { transform: translateY(100vh) rotate(720deg); opacity: 0; }
+  0% {
+    transform: translateY(-100%) rotate(0deg);
+    opacity: 1;
+  }
+
+  100% {
+    transform: translateY(100vh) rotate(720deg);
+    opacity: 0;
+  }
 }
 
 /* Success checkmark drawing animation */
 @keyframes draw-check {
-  0% { stroke-dashoffset: 50; }
-  100% { stroke-dashoffset: 0; }
+  0% {
+    stroke-dashoffset: 50;
+  }
+
+  100% {
+    stroke-dashoffset: 0;
+  }
 }
 
 /* Success circle drawing animation */
 @keyframes draw-circle {
-  0% { stroke-dashoffset: 166; }
-  100% { stroke-dashoffset: 0; }
+  0% {
+    stroke-dashoffset: 166;
+  }
+
+  100% {
+    stroke-dashoffset: 0;
+  }
 }
 
 /* Gentle bounce for cart icons */
 @keyframes bounce-gentle {
-  0%, 100% { transform: translateY(0); }
-  25% { transform: translateY(-4px); }
-  75% { transform: translateY(2px); }
+
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+
+  25% {
+    transform: translateY(-4px);
+  }
+
+  75% {
+    transform: translateY(2px);
+  }
 }
 
 /* Slide up with fade for page entrances */
 @keyframes slide-up-fade {
-  0% { opacity: 0; transform: translateY(20px); }
-  100% { opacity: 1; transform: translateY(0); }
+  0% {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 /* Scale in for modals and popups */
 @keyframes scale-in {
-  0% { opacity: 0; transform: scale(0.9); }
-  100% { opacity: 1; transform: scale(1); }
+  0% {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
 }
 
 /* Ripple effect for button presses */
 @keyframes ripple {
-  0% { transform: scale(0); opacity: 0.5; }
-  100% { transform: scale(4); opacity: 0; }
+  0% {
+    transform: scale(0);
+    opacity: 0.5;
+  }
+
+  100% {
+    transform: scale(4);
+    opacity: 0;
+  }
 }
 
 /* Pulsing border for scan frame */
 @keyframes pulse-border {
-  0%, 100% { border-color: rgba(59, 130, 246, 0.6); }
-  50% { border-color: rgba(99, 102, 241, 1); }
+
+  0%,
+  100% {
+    border-color: rgba(59, 130, 246, 0.6);
+  }
+
+  50% {
+    border-color: rgba(99, 102, 241, 1);
+  }
 }
 
 /* Gradient text shimmer */
 @keyframes gradient-shift {
-  0% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
-  100% { background-position: 0% 50%; }
+  0% {
+    background-position: 0% 50%;
+  }
+
+  50% {
+    background-position: 100% 50%;
+  }
+
+  100% {
+    background-position: 0% 50%;
+  }
 }
 
 /* ==========================================================================
@@ -323,14 +415,37 @@ input.bg-gray-50:-webkit-autofill {
 }
 
 /* Stagger delay utilities for children animations */
-.stagger-1 { animation-delay: 0.05s; }
-.stagger-2 { animation-delay: 0.1s; }
-.stagger-3 { animation-delay: 0.15s; }
-.stagger-4 { animation-delay: 0.2s; }
-.stagger-5 { animation-delay: 0.25s; }
-.stagger-6 { animation-delay: 0.3s; }
-.stagger-7 { animation-delay: 0.35s; }
-.stagger-8 { animation-delay: 0.4s; }
+.stagger-1 {
+  animation-delay: 0.05s;
+}
+
+.stagger-2 {
+  animation-delay: 0.1s;
+}
+
+.stagger-3 {
+  animation-delay: 0.15s;
+}
+
+.stagger-4 {
+  animation-delay: 0.2s;
+}
+
+.stagger-5 {
+  animation-delay: 0.25s;
+}
+
+.stagger-6 {
+  animation-delay: 0.3s;
+}
+
+.stagger-7 {
+  animation-delay: 0.35s;
+}
+
+.stagger-8 {
+  animation-delay: 0.4s;
+}
 
 /* Premium glassmorphism card */
 .glass-card {
@@ -366,4 +481,111 @@ input.bg-gray-50:-webkit-autofill {
 
 .img-zoom:hover {
   transform: scale(1.08);
+}
+
+/* ==========================================================================
+   Hardware-Accelerated Ambient Background Keyframes (GPU Compositor Thread)
+   Fixes typing latency and browser frame drops
+   ========================================================================== */
+
+@keyframes orb-float-1 {
+
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+
+  33% {
+    transform: translate3d(50px, -40px, 0) scale(1.15);
+  }
+
+  66% {
+    transform: translate3d(-35px, 25px, 0) scale(0.95);
+  }
+}
+
+@keyframes orb-float-2 {
+
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+
+  33% {
+    transform: translate3d(-45px, 35px, 0) scale(1.18);
+  }
+
+  66% {
+    transform: translate3d(40px, -30px, 0) scale(0.92);
+  }
+}
+
+@keyframes orb-pulse-center {
+
+  0%,
+  100% {
+    transform: translate3d(-50%, -50%, 0) scale(1);
+    opacity: 0.15;
+  }
+
+  50% {
+    transform: translate3d(-50%, -50%, 0) scale(1.22);
+    opacity: 0.28;
+  }
+}
+
+@keyframes particle-drift {
+
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0) scale(1);
+    opacity: 0.25;
+  }
+
+  50% {
+    transform: translate3d(0, -32px, 0) scale(1.4);
+    opacity: 0.85;
+  }
+}
+
+.animate-orb-1 {
+  animation: orb-float-1 18s ease-in-out infinite;
+  will-change: transform;
+  transform: translate3d(0, 0, 0);
+}
+
+.animate-orb-2 {
+  animation: orb-float-2 22s ease-in-out infinite 2s;
+  will-change: transform;
+  transform: translate3d(0, 0, 0);
+}
+
+.animate-orb-center {
+  animation: orb-pulse-center 12s ease-in-out infinite;
+  will-change: transform, opacity;
+}
+
+.animate-particle-drift-1 {
+  animation: particle-drift 7s ease-in-out infinite;
+  will-change: transform, opacity;
+}
+
+.animate-particle-drift-2 {
+  animation: particle-drift 9s ease-in-out infinite 1s;
+  will-change: transform, opacity;
+}
+
+.animate-particle-drift-3 {
+  animation: particle-drift 8s ease-in-out infinite 2s;
+  will-change: transform, opacity;
+}
+
+.animate-particle-drift-4 {
+  animation: particle-drift 6s ease-in-out infinite 0.5s;
+  will-change: transform, opacity;
+}
+
+.animate-particle-drift-5 {
+  animation: particle-drift 10s ease-in-out infinite 1.5s;
+  will-change: transform, opacity;
 }

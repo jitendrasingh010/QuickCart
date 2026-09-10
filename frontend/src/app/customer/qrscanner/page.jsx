@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState, useCallback, useMemo } from "react";
+import React, { useEffect, useRef, useState, useCallback, useMemo } from "react";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import { Html5Qrcode } from "html5-qrcode";
@@ -50,23 +50,6 @@ export default function ScanPage() {
   // Cart State
   const [cart, setCart] = useState([]);
   const [isCheckingOut, setIsCheckingOut] = useState(false);
-
-  /* ── 🤖 Animated Smart Shopping Assistant Mascot State (Looping Story) ── */
-  // Step 0: Mascot stands & holds product with QR tag
-  // Step 1: Mascot points & moves item toward scanner
-  // Step 2: Blue laser scans the QR (scanner glows)
-  // Step 3: Big green tick appears (scan success)
-  // Step 4: Mascot smiles & gives Thumbs Up 👍
-  const [mascotStep, setMascotStep] = useState(0);
-
-  useEffect(() => {
-    const stepDurations = [2200, 2000, 2200, 2000, 2400];
-    const timer = setTimeout(() => {
-      setMascotStep((prev) => (prev + 1) % stepDurations.length);
-    }, stepDurations[mascotStep]);
-
-    return () => clearTimeout(timer);
-  }, [mascotStep]);
 
   /* ── Premium Animation States ── */
   const [showSparkle, setShowSparkle] = useState(false);        // Sparkle burst on scan success
@@ -154,7 +137,7 @@ export default function ScanPage() {
   }, []);
 
   // Live Camera Scanner - Single Scan per Session Enforcement
-  const startScanner = async () => {
+  const startScanner = useCallback(async () => {
     if (isScanning) return;
     setScanError(null);
     hasScannedRef.current = false;
@@ -203,16 +186,16 @@ export default function ScanPage() {
         try {
           await scannerRef.current.stop();
           await scannerRef.current.clear();
-        } catch (_) {}
+        } catch (_) { }
         scannerRef.current = null;
       }
       hasScannedRef.current = false;
       isProcessingRef.current = false;
       setIsScanning(false);
     }
-  };
+  }, [isScanning, addProductToCart]);
 
-  const stopScanner = async () => {
+  const stopScanner = useCallback(async () => {
     if (scannerRef.current) {
       try {
         await scannerRef.current.stop();
@@ -225,16 +208,16 @@ export default function ScanPage() {
     hasScannedRef.current = false;
     isProcessingRef.current = false;
     setIsScanning(false);
-  };
+  }, []);
 
   // Cleanup scanner and flags on unmount
   useEffect(() => {
     return () => {
       if (scannerRef.current) {
         try {
-          scannerRef.current.stop().catch(() => {});
-          scannerRef.current.clear().catch(() => {});
-        } catch (_) {}
+          scannerRef.current.stop().catch(() => { });
+          scannerRef.current.clear().catch(() => { });
+        } catch (_) { }
         scannerRef.current = null;
       }
       hasScannedRef.current = false;
@@ -245,13 +228,13 @@ export default function ScanPage() {
   }, []);
 
   // Cart operations (Remove only - No +/- buttons as per instructions)
-  const removeFromCart = (productId) => {
+  const removeFromCart = useCallback((productId) => {
     setCart((prev) => prev.filter((item) => item.productId !== productId));
-  };
+  }, []);
 
-  const clearCart = () => {
+  const clearCart = useCallback(() => {
     setCart([]);
-  };
+  }, []);
 
   // Cart Totals
   const total = useMemo(() => {
@@ -263,7 +246,7 @@ export default function ScanPage() {
   }, [cart]);
 
   // Razorpay Checkout - Single Execution Guard
-  const handlePayment = async () => {
+  const handlePayment = useCallback(async () => {
     if (cart.length === 0) {
       setScanError("Please scan at least one product before checking out.");
       return;
@@ -369,7 +352,7 @@ export default function ScanPage() {
       hasVerifiedPaymentRef.current = false;
       hasScannedRef.current = false;
     }
-  };
+  }, [cart, isCheckingOut, total]);
 
   return (
     <div className="w-full flex flex-col space-y-8 max-w-7xl mx-auto pb-20 select-none font-sans">
@@ -600,7 +583,7 @@ export default function ScanPage() {
 
             {/* Scanner Grid: Main Viewfinder (Left 7 Cols) + Cute Animated Smart Assistant Mascot (Right 5 Cols) */}
             <div className="grid grid-cols-1 md:grid-cols-12 gap-6 items-center">
-              
+
               {/* Left Viewfinder Area (7 Cols) */}
               <div className="md:col-span-7 space-y-4">
                 {/* Live Camera Viewfinder (When active) */}
@@ -663,200 +646,7 @@ export default function ScanPage() {
 
               {/* 🤖 Right: Cute Animated Shopping Assistant Mascot Companion (5 Cols) */}
               <div className="md:col-span-5 h-full">
-                <div className="relative rounded-[32px] bg-gradient-to-b from-blue-950/80 via-slate-950 to-indigo-950/90 border border-blue-500/30 p-5 flex flex-col items-center justify-between text-center overflow-hidden shadow-xl min-h-[310px]">
-                  
-                  {/* Subtle Background Glows */}
-                  <div className="absolute top-0 right-0 w-32 h-32 bg-blue-500/20 rounded-full blur-2xl pointer-events-none" />
-                  <div className="absolute bottom-0 left-0 w-32 h-32 bg-cyan-500/20 rounded-full blur-2xl pointer-events-none" />
-
-                  {/* Top Badge: AI Smart Shopping Guide */}
-                  <div className="relative z-10 inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/10 backdrop-blur-md border border-white/15 text-[10px] font-bold text-blue-200">
-                    <Sparkles size={11} className="text-cyan-400 animate-pulse" />
-                    <span>QuickBot • Shopping Guide</span>
-                  </div>
-
-                  {/* 🤖 Mascot Character Animation Canvas */}
-                  <motion.div
-                    animate={{ y: [0, -6, 0] }}
-                    transition={{ duration: 2.8, repeat: Infinity, ease: "easeInOut" }}
-                    className="relative my-3 flex flex-col items-center"
-                  >
-                    {/* Floating Sparkles around Mascot */}
-                    <motion.span
-                      animate={{ opacity: [0.3, 1, 0.3], scale: [0.8, 1.2, 0.8] }}
-                      transition={{ duration: 2, repeat: Infinity }}
-                      className="absolute -top-3 -right-4 text-xs"
-                    >
-                      ✨
-                    </motion.span>
-                    <motion.span
-                      animate={{ opacity: [0.3, 1, 0.3], scale: [0.8, 1.2, 0.8] }}
-                      transition={{ duration: 2.4, repeat: Infinity, delay: 0.5 }}
-                      className="absolute -bottom-1 -left-4 text-xs"
-                    >
-                      ⭐
-                    </motion.span>
-
-                    {/* Robot Head with Cute Blinking Eyes */}
-                    <div className="w-20 h-18 rounded-3xl bg-gradient-to-tr from-slate-900 via-blue-900 to-indigo-900 border-2 border-cyan-400/80 shadow-lg shadow-cyan-500/30 flex flex-col items-center justify-center relative p-2">
-                      
-                      {/* Robot Antenna with Glowing Tip */}
-                      <div className="absolute -top-3 w-1 h-3 bg-cyan-400 rounded-t-full flex items-start justify-center">
-                        <span className="w-2 h-2 rounded-full bg-cyan-300 shadow-sm shadow-cyan-400 animate-ping absolute -top-1" />
-                        <span className="w-2 h-2 rounded-full bg-cyan-300 absolute -top-1" />
-                      </div>
-
-                      {/* Screen Visor with Animated Blinking Eyes */}
-                      <div className="w-14 h-9 rounded-2xl bg-slate-950 border border-cyan-500/50 flex items-center justify-center gap-2.5 shadow-inner">
-                        {/* Left Eye with Blink Animation */}
-                        <motion.div
-                          animate={{ scaleY: [1, 1, 0.1, 1, 1] }}
-                          transition={{ duration: 3, repeat: Infinity, times: [0, 0.8, 0.85, 0.9, 1] }}
-                          className={`rounded-full shadow-sm transition-all duration-300 ${
-                            mascotStep === 4 || mascotStep === 3
-                              ? "w-3 h-1.5 bg-emerald-400 rounded-t-full"
-                              : "w-2.5 h-2.5 bg-cyan-400 shadow-cyan-400"
-                          }`}
-                        />
-                        {/* Right Eye with Blink Animation */}
-                        <motion.div
-                          animate={{ scaleY: [1, 1, 0.1, 1, 1] }}
-                          transition={{ duration: 3, repeat: Infinity, times: [0, 0.8, 0.85, 0.9, 1] }}
-                          className={`rounded-full shadow-sm transition-all duration-300 ${
-                            mascotStep === 4 || mascotStep === 3
-                              ? "w-3 h-1.5 bg-emerald-400 rounded-t-full"
-                              : "w-2.5 h-2.5 bg-cyan-400 shadow-cyan-400"
-                          }`}
-                        />
-                      </div>
-
-                      {/* Cute Rosy Cheeks */}
-                      <div className="w-12 flex justify-between px-1 mt-0.5">
-                        <span className="w-1.5 h-1 rounded-full bg-pink-400/60 blur-[0.5px]" />
-                        <span className="w-1.5 h-1 rounded-full bg-pink-400/60 blur-[0.5px]" />
-                      </div>
-                    </div>
-
-                    {/* Robot Body with Interactive Hands */}
-                    <div className="w-16 h-12 rounded-2xl bg-gradient-to-b from-blue-900 to-slate-900 border border-blue-400/50 mt-1 relative flex items-center justify-center shadow-md">
-                      
-                      {/* Chest Mini Status Hologram */}
-                      <div className="w-7 h-5 rounded-lg bg-slate-950 border border-blue-400/40 flex items-center justify-center">
-                        <Bot size={12} className="text-cyan-400" />
-                      </div>
-
-                      {/* Left Arm: Holds Product (Avocado with QR tag) */}
-                      <motion.div
-                        animate={
-                          mascotStep === 1 || mascotStep === 2
-                            ? { x: -14, y: -4, rotate: -20 }
-                            : { x: 0, y: 0, rotate: 0 }
-                        }
-                        transition={{ duration: 0.5, ease: "easeInOut" }}
-                        className="absolute -left-4 top-1.5 flex items-center gap-1"
-                      >
-                        <div className="w-3.5 h-3.5 rounded-full bg-blue-500 border border-cyan-300" />
-                        <motion.div
-                          animate={mascotStep === 2 ? { rotate: [0, 10, -10, 0] } : {}}
-                          transition={{ duration: 1, repeat: Infinity }}
-                          className="p-1 rounded-lg bg-slate-900/90 border border-cyan-400/80 text-[10px] shadow-md flex items-center"
-                        >
-                          <span>🥑</span>
-                          <QrCode size={10} className="text-cyan-300 ml-0.5" />
-                        </motion.div>
-                      </motion.div>
-
-                      {/* Right Arm: Points towards scanner or gives Thumbs Up */}
-                      <motion.div
-                        animate={
-                          mascotStep === 4
-                            ? { x: 4, y: -10, rotate: 25 }
-                            : mascotStep === 1 || mascotStep === 2
-                            ? { x: -6, y: -2, rotate: -35 }
-                            : { x: 0, y: 0, rotate: 0 }
-                        }
-                        transition={{ duration: 0.5, ease: "easeInOut" }}
-                        className="absolute -right-3 top-1.5 flex items-center"
-                      >
-                        {mascotStep === 4 ? (
-                          <span className="text-base animate-bounce">👍</span>
-                        ) : (
-                          <div className="w-3.5 h-3.5 rounded-full bg-blue-500 border border-cyan-300 flex items-center justify-center text-[8px] text-white">
-                            👉
-                          </div>
-                        )}
-                      </motion.div>
-                    </div>
-                  </motion.div>
-
-                  {/* 🎭 Mascot Dynamic Speech & Action Prompt Box */}
-                  <div className="relative z-10 w-full">
-                    <AnimatePresence mode="wait">
-                      {mascotStep === 0 && (
-                        <motion.div
-                          key="m0"
-                          initial={{ opacity: 0, y: 5 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          exit={{ opacity: 0, y: -5 }}
-                          className="px-3 py-1.5 rounded-xl bg-blue-900/40 border border-blue-400/30 text-[11px] font-bold text-blue-200"
-                        >
-                          "Hi there! Grab any product QR to scan."
-                        </motion.div>
-                      )}
-
-                      {mascotStep === 1 && (
-                        <motion.div
-                          key="m1"
-                          initial={{ opacity: 0, y: 5 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          exit={{ opacity: 0, y: -5 }}
-                          className="px-3 py-1.5 rounded-xl bg-cyan-900/40 border border-cyan-400/40 text-[11px] font-bold text-cyan-200"
-                        >
-                          "Aim the packaging barcode at the camera 👉"
-                        </motion.div>
-                      )}
-
-                      {mascotStep === 2 && (
-                        <motion.div
-                          key="m2"
-                          initial={{ opacity: 0, y: 5 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          exit={{ opacity: 0, y: -5 }}
-                          className="px-3 py-1.5 rounded-xl bg-indigo-900/40 border border-indigo-400/40 text-[11px] font-bold text-indigo-200 flex items-center justify-center gap-1.5"
-                        >
-                          <Zap size={12} className="text-cyan-400 animate-spin" />
-                          <span>"Blue laser scanning QR code..."</span>
-                        </motion.div>
-                      )}
-
-                      {mascotStep === 3 && (
-                        <motion.div
-                          key="m3"
-                          initial={{ opacity: 0, scale: 0.9 }}
-                          animate={{ opacity: 1, scale: 1 }}
-                          exit={{ opacity: 0 }}
-                          className="px-3 py-1.5 rounded-xl bg-emerald-950/60 border border-emerald-400 text-[11px] font-bold text-emerald-300 flex items-center justify-center gap-1"
-                        >
-                          <CheckCircle2 size={13} className="text-emerald-400" />
-                          <span>"✓ QR Verified & Added to Cart!"</span>
-                        </motion.div>
-                      )}
-
-                      {mascotStep === 4 && (
-                        <motion.div
-                          key="m4"
-                          initial={{ opacity: 0, scale: 0.9 }}
-                          animate={{ opacity: 1, scale: 1 }}
-                          exit={{ opacity: 0 }}
-                          className="px-3 py-1.5 rounded-xl bg-emerald-950/60 border border-emerald-400 text-[11px] font-bold text-emerald-300 flex items-center justify-center gap-1"
-                        >
-                          <ThumbsUp size={12} className="text-emerald-400" />
-                          <span>"Great job! Ready for your next item."</span>
-                        </motion.div>
-                      )}
-                    </AnimatePresence>
-                  </div>
-                </div>
+                <QuickBotGuide />
               </div>
             </div>
 
@@ -984,59 +774,11 @@ export default function ScanPage() {
                   </thead>
                   <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
                     {cart.map((item) => (
-                      <tr key={item.productId} className="hover:bg-slate-50/60 dark:hover:bg-slate-800/50 transition-colors">
-                        {/* Product info */}
-                        <td className="py-3.5 px-3">
-                          <div className="flex items-center gap-3">
-                            <div className="w-10 h-10 rounded-xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 overflow-hidden flex items-center justify-center shrink-0">
-                              {item.image ? (
-                                <img
-                                  src={item.image}
-                                  alt={item.name}
-                                  className="w-full h-full object-contain p-1"
-                                />
-                              ) : (
-                                <Package size={18} className="text-slate-400 dark:text-slate-500" />
-                              )}
-                            </div>
-                            <div>
-                              <p className="font-bold text-slate-900 dark:text-white">{item.name}</p>
-                              <span className="text-[10px] text-slate-400 dark:text-slate-500 font-mono">
-                                ID: #{item.productId}
-                              </span>
-                            </div>
-                          </div>
-                        </td>
-
-                        {/* Unit Price */}
-                        <td className="py-3.5 px-3 text-center text-slate-600 dark:text-slate-300 font-mono font-medium">
-                          ₹{Number(item.price).toFixed(2)}
-                        </td>
-
-                        {/* Scanned Count (No buttons - incremented by scanning) */}
-                        <td className="py-3.5 px-3 text-center">
-                          <span className="inline-block px-3 py-1 rounded-full text-xs font-black bg-blue-50 dark:bg-blue-950/60 text-blue-700 dark:text-blue-300 border border-blue-200/60 dark:border-blue-800/60 shadow-2xs font-mono">
-                            Scanned ×{item.quantity}
-                          </span>
-                        </td>
-
-                        {/* Subtotal */}
-                        <td className="py-3.5 px-3 text-right font-black text-slate-900 dark:text-white text-sm font-mono">
-                          ₹{Number(item.price * item.quantity).toFixed(2)}
-                        </td>
-
-                        {/* Remove Action */}
-                        <td className="py-3.5 px-3 text-right">
-                          <button
-                            type="button"
-                            onClick={() => removeFromCart(item.productId)}
-                            className="text-slate-400 hover:text-rose-600 dark:hover:text-rose-400 p-1.5 rounded-lg hover:bg-rose-50 dark:hover:bg-rose-950/50 transition cursor-pointer"
-                            title="Remove item"
-                          >
-                            <Trash2 size={15} />
-                          </button>
-                        </td>
-                      </tr>
+                      <CartItemRow
+                        key={item.productId}
+                        item={item}
+                        onRemove={removeFromCart}
+                      />
                     ))}
                   </tbody>
                 </table>
@@ -1142,3 +884,275 @@ export default function ScanPage() {
     </div>
   );
 }
+
+// =========================================================================
+// 🤖 MEMOIZED QUICKBOT GUIDE MASCOT COMPONENT
+// Isolates high-frequency mascot loop state to prevent camera/cart re-renders
+// =========================================================================
+const QuickBotGuide = React.memo(function QuickBotGuide() {
+  const [mascotStep, setMascotStep] = useState(0);
+
+  useEffect(() => {
+    const stepDurations = [2200, 2000, 2200, 2000, 2400];
+    const timer = setTimeout(() => {
+      setMascotStep((prev) => (prev + 1) % stepDurations.length);
+    }, stepDurations[mascotStep]);
+
+    return () => clearTimeout(timer);
+  }, [mascotStep]);
+
+  return (
+    <div className="relative rounded-[32px] bg-gradient-to-b from-blue-950/80 via-slate-950 to-indigo-950/90 border border-blue-500/30 p-5 flex flex-col items-center justify-between text-center overflow-hidden shadow-xl min-h-[310px]">
+      {/* Subtle Background Glows */}
+      <div className="absolute top-0 right-0 w-32 h-32 bg-blue-500/20 rounded-full blur-2xl pointer-events-none" />
+      <div className="absolute bottom-0 left-0 w-32 h-32 bg-cyan-500/20 rounded-full blur-2xl pointer-events-none" />
+
+      {/* Top Badge: AI Smart Shopping Guide */}
+      <div className="relative z-10 inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/10 backdrop-blur-md border border-white/15 text-[10px] font-bold text-blue-200">
+        <Sparkles size={11} className="text-cyan-400 animate-pulse" />
+        <span>QuickBot • Shopping Guide</span>
+      </div>
+
+      {/* 🤖 Mascot Character Animation Canvas */}
+      <motion.div
+        animate={{ y: [0, -6, 0] }}
+        transition={{ duration: 2.8, repeat: Infinity, ease: "easeInOut" }}
+        className="relative my-3 flex flex-col items-center"
+      >
+        {/* Floating Sparkles around Mascot */}
+        <motion.span
+          animate={{ opacity: [0.3, 1, 0.3], scale: [0.8, 1.2, 0.8] }}
+          transition={{ duration: 2, repeat: Infinity }}
+          className="absolute -top-3 -right-4 text-xs"
+        >
+          ✨
+        </motion.span>
+        <motion.span
+          animate={{ opacity: [0.3, 1, 0.3], scale: [0.8, 1.2, 0.8] }}
+          transition={{ duration: 2.4, repeat: Infinity, delay: 0.5 }}
+          className="absolute -bottom-1 -left-4 text-xs"
+        >
+          ⭐
+        </motion.span>
+
+        {/* Robot Head with Cute Blinking Eyes */}
+        <div className="w-20 h-18 rounded-3xl bg-gradient-to-tr from-slate-900 via-blue-900 to-indigo-900 border-2 border-cyan-400/80 shadow-lg shadow-cyan-500/30 flex flex-col items-center justify-center relative p-2">
+          {/* Robot Antenna with Glowing Tip */}
+          <div className="absolute -top-3 w-1 h-3 bg-cyan-400 rounded-t-full flex items-start justify-center">
+            <span className="w-2 h-2 rounded-full bg-cyan-300 shadow-sm shadow-cyan-400 animate-ping absolute -top-1" />
+            <span className="w-2 h-2 rounded-full bg-cyan-300 absolute -top-1" />
+          </div>
+
+          {/* Screen Visor with Animated Blinking Eyes */}
+          <div className="w-14 h-9 rounded-2xl bg-slate-950 border border-cyan-500/50 flex items-center justify-center gap-2.5 shadow-inner">
+            {/* Left Eye with Blink Animation */}
+            <motion.div
+              animate={{ scaleY: [1, 1, 0.1, 1, 1] }}
+              transition={{ duration: 3, repeat: Infinity, times: [0, 0.8, 0.85, 0.9, 1] }}
+              className={`rounded-full shadow-sm transition-all duration-300 ${mascotStep === 4 || mascotStep === 3
+                  ? "w-3 h-1.5 bg-emerald-400 rounded-t-full"
+                  : "w-2.5 h-2.5 bg-cyan-400 shadow-cyan-400"
+                }`}
+            />
+            {/* Right Eye with Blink Animation */}
+            <motion.div
+              animate={{ scaleY: [1, 1, 0.1, 1, 1] }}
+              transition={{ duration: 3, repeat: Infinity, times: [0, 0.8, 0.85, 0.9, 1] }}
+              className={`rounded-full shadow-sm transition-all duration-300 ${mascotStep === 4 || mascotStep === 3
+                  ? "w-3 h-1.5 bg-emerald-400 rounded-t-full"
+                  : "w-2.5 h-2.5 bg-cyan-400 shadow-cyan-400"
+                }`}
+            />
+          </div>
+
+          {/* Cute Rosy Cheeks */}
+          <div className="w-12 flex justify-between px-1 mt-0.5">
+            <span className="w-1.5 h-1 rounded-full bg-pink-400/60 blur-[0.5px]" />
+            <span className="w-1.5 h-1 rounded-full bg-pink-400/60 blur-[0.5px]" />
+          </div>
+        </div>
+
+        {/* Robot Body with Interactive Hands */}
+        <div className="w-16 h-12 rounded-2xl bg-gradient-to-b from-blue-900 to-slate-900 border border-blue-400/50 mt-1 relative flex items-center justify-center shadow-md">
+          {/* Chest Mini Status Hologram */}
+          <div className="w-7 h-5 rounded-lg bg-slate-950 border border-blue-400/40 flex items-center justify-center">
+            <Bot size={12} className="text-cyan-400" />
+          </div>
+
+          {/* Left Arm: Holds Product (Avocado with QR tag) */}
+          <motion.div
+            animate={
+              mascotStep === 1 || mascotStep === 2
+                ? { x: -14, y: -4, rotate: -20 }
+                : { x: 0, y: 0, rotate: 0 }
+            }
+            transition={{ duration: 0.5, ease: "easeInOut" }}
+            className="absolute -left-4 top-1.5 flex items-center gap-1"
+          >
+            <div className="w-3.5 h-3.5 rounded-full bg-blue-500 border border-cyan-300" />
+            <motion.div
+              animate={mascotStep === 2 ? { rotate: [0, 10, -10, 0] } : {}}
+              transition={{ duration: 1, repeat: Infinity }}
+              className="p-1 rounded-lg bg-slate-900/90 border border-cyan-400/80 text-[10px] shadow-md flex items-center"
+            >
+              <span>🥑</span>
+              <QrCode size={10} className="text-cyan-300 ml-0.5" />
+            </motion.div>
+          </motion.div>
+
+          {/* Right Arm: Points towards scanner or gives Thumbs Up */}
+          <motion.div
+            animate={
+              mascotStep === 4
+                ? { x: 4, y: -10, rotate: 25 }
+                : mascotStep === 1 || mascotStep === 2
+                  ? { x: -6, y: -2, rotate: -35 }
+                  : { x: 0, y: 0, rotate: 0 }
+            }
+            transition={{ duration: 0.5, ease: "easeInOut" }}
+            className="absolute -right-3 top-1.5 flex items-center"
+          >
+            {mascotStep === 4 ? (
+              <span className="text-base animate-bounce">👍</span>
+            ) : (
+              <div className="w-3.5 h-3.5 rounded-full bg-blue-500 border border-cyan-300 flex items-center justify-center text-[8px] text-white">
+                👉
+              </div>
+            )}
+          </motion.div>
+        </div>
+      </motion.div>
+
+      {/* 🎭 Mascot Dynamic Speech & Action Prompt Box */}
+      <div className="relative z-10 w-full">
+        <AnimatePresence mode="wait">
+          {mascotStep === 0 && (
+            <motion.div
+              key="m0"
+              initial={{ opacity: 0, y: 5 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -5 }}
+              className="px-3 py-1.5 rounded-xl bg-blue-900/40 border border-blue-400/30 text-[11px] font-bold text-blue-200"
+            >
+              "Hi there! Grab any product QR to scan."
+            </motion.div>
+          )}
+
+          {mascotStep === 1 && (
+            <motion.div
+              key="m1"
+              initial={{ opacity: 0, y: 5 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -5 }}
+              className="px-3 py-1.5 rounded-xl bg-cyan-900/40 border border-cyan-400/40 text-[11px] font-bold text-cyan-200"
+            >
+              "Aim the packaging barcode at the camera 👉"
+            </motion.div>
+          )}
+
+          {mascotStep === 2 && (
+            <motion.div
+              key="m2"
+              initial={{ opacity: 0, y: 5 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -5 }}
+              className="px-3 py-1.5 rounded-xl bg-indigo-900/40 border border-indigo-400/40 text-[11px] font-bold text-indigo-200 flex items-center justify-center gap-1.5"
+            >
+              <Zap size={12} className="text-cyan-400 animate-spin" />
+              <span>"Blue laser scanning QR code..."</span>
+            </motion.div>
+          )}
+
+          {mascotStep === 3 && (
+            <motion.div
+              key="m3"
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0 }}
+              className="px-3 py-1.5 rounded-xl bg-emerald-950/60 border border-emerald-400 text-[11px] font-bold text-emerald-300 flex items-center justify-center gap-1"
+            >
+              <CheckCircle2 size={13} className="text-emerald-400" />
+              <span>"✓ QR Verified & Added to Cart!"</span>
+            </motion.div>
+          )}
+
+          {mascotStep === 4 && (
+            <motion.div
+              key="m4"
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0 }}
+              className="px-3 py-1.5 rounded-xl bg-emerald-950/60 border border-emerald-400 text-[11px] font-bold text-emerald-300 flex items-center justify-center gap-1"
+            >
+              <ThumbsUp size={12} className="text-emerald-400" />
+              <span>"Great job! Ready for your next item."</span>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
+    </div>
+  );
+});
+
+// =========================================================================
+// 🛒 MEMOIZED CART ITEM ROW COMPONENT
+// Prevents entire cart table re-render on incremental scans
+// =========================================================================
+const CartItemRow = React.memo(function CartItemRow({ item, onRemove }) {
+  return (
+    <tr className="hover:bg-slate-50/60 dark:hover:bg-slate-800/50 transition-colors">
+      {/* Product info */}
+      <td className="py-3.5 px-3">
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 overflow-hidden flex items-center justify-center shrink-0">
+            {item.image ? (
+              <img
+                src={item.image}
+                alt={item.name}
+                className="w-full h-full object-contain p-1"
+              />
+            ) : (
+              <Package size={18} className="text-slate-400 dark:text-slate-500" />
+            )}
+          </div>
+          <div>
+            <p className="font-bold text-slate-900 dark:text-white">{item.name}</p>
+            <span className="text-[10px] text-slate-400 dark:text-slate-500 font-mono">
+              ID: #{item.productId}
+            </span>
+          </div>
+        </div>
+      </td>
+
+      {/* Unit Price */}
+      <td className="py-3.5 px-3 text-center text-slate-600 dark:text-slate-300 font-mono font-medium">
+        ₹{Number(item.price).toFixed(2)}
+      </td>
+
+      {/* Scanned Count (No buttons - incremented by scanning) */}
+      <td className="py-3.5 px-3 text-center">
+        <span className="inline-block px-3 py-1 rounded-full text-xs font-black bg-blue-50 dark:bg-blue-950/60 text-blue-700 dark:text-blue-300 border border-blue-200/60 dark:border-blue-800/60 shadow-2xs font-mono">
+          Scanned ×{item.quantity}
+        </span>
+      </td>
+
+      {/* Subtotal */}
+      <td className="py-3.5 px-3 text-right font-black text-slate-900 dark:text-white text-sm font-mono">
+        ₹{Number(item.price * item.quantity).toFixed(2)}
+      </td>
+
+      {/* Remove Action */}
+      <td className="py-3.5 px-3 text-right">
+        <button
+          type="button"
+          onClick={() => onRemove(item.productId)}
+          className="text-slate-400 hover:text-rose-600 dark:hover:text-rose-400 p-1.5 rounded-lg hover:bg-rose-50 dark:hover:bg-rose-950/50 transition cursor-pointer"
+          title="Remove item"
+        >
+          <Trash2 size={15} />
+        </button>
+      </td>
+    </tr>
+  );
+});
+

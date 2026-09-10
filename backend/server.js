@@ -1,16 +1,16 @@
-require('dotenv').config();
+require("dotenv").config();
 const express = require('express');
 const db = require('./models/index.js');
 const cors = require('cors');
 const cookieParser = require("cookie-parser");
-require('dotenv').config();
+
 
 const app = express();
-const PORT = 5000;
+const PORT = process.env.PORT || 5000;
 
 app.use(express.json());
 app.use(cors({
-    // origin: 'http://localhost:3000',
+    // origin:"http://localhost:3000",
     origin: 'https://quickcart-frontend-02pg.onrender.com',
     credentials: true,
 }));

@@ -1,12 +1,16 @@
+require("dotenv").config();
 const Razorpay = require("razorpay");
 const crypto = require("crypto");
 
-const razorpay = new Razorpay({
-  key_id: process.env.RAZORPAY_KEY_ID,
-  key_secret: process.env.RAZORPAY_KEY_SECRET,
-});
+const getRazorpayInstance = () => {
+  return new Razorpay({
+    key_id: process.env.RAZORPAY_KEY_ID || "",
+    key_secret: process.env.RAZORPAY_KEY_SECRET || "",
+  });
+};
 
 exports.createOrder = async (amount) => {
+  const razorpay = getRazorpayInstance();
   return await razorpay.orders.create({
     amount: amount * 100,
     currency: "INR",
